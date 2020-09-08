@@ -1,0 +1,14 @@
+
+SELECT distinct ?item
+WHERE 
+{
+  VALUES ?compat_types { wd:Q3331189 wd:Q47461344 wd:Q7725634 wd:Q3331189 wd:Q571}.
+  ?item wdt:P31 ?compat_types.
+  OPTIONAL { ?item wdt:P212 ?isbn13 }
+  OPTIONAL { ?item wdt:P957 ?isbn10 }
+  BIND(COALESCE(?isbn13, ?isbn10) as ?isbn).
+  FILTER (BOUND(?isbn)).
+  FILTER NOT EXISTS {?item wdt:P8383 ?gr}.
+  FILTER NOT EXISTS {?item wdt:P2969 ?gr}.
+  FILTER NOT EXISTS {?item wdt:P6947 ?gr}.  
+}  limit 13
