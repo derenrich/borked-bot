@@ -5,3 +5,6 @@ pywikibot==4.3.0
 requests==2.24.0
 urllib3==1.25.10
 ratelimiter==1.2.0.post0
+isbnlib
+tqdm
+

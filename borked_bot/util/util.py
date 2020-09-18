@@ -9,14 +9,15 @@ def get_valid_claims(item, prop_id):
 
 def get_session():
     s = requests.Session()
+    s.headers.update({'User-Agent': 'BorkedBot[Wikidata]'})
     return s
 
 def add_claim(repo, item, prop, target, sources = [], comment=""):
     c = pywikibot.Claim(repo, prop)
     c.setTarget(target)
-    item.addClaim(c, summary=comment)
+    item.addClaim(c, summary=comment, bot=True)
     if sources:
-        c.addSources(sources, summary="adding sources")
+        c.addSources(sources, summary="adding sources", bot=True)
     return c
 
 def retrieved_claim(repo):
@@ -25,4 +26,6 @@ def retrieved_claim(repo):
     retrieved = pywikibot.Claim(repo, u'P813')
     retrieved.setTarget(now)
     return retrieved
+
+
 

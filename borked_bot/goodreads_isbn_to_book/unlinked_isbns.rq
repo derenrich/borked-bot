@@ -10,5 +10,5 @@ WHERE
   FILTER (BOUND(?isbn)).
   FILTER NOT EXISTS {?item wdt:P8383 ?gr}.
   FILTER NOT EXISTS {?item wdt:P2969 ?gr}.
-  FILTER NOT EXISTS {?item wdt:P6947 ?gr}.  
-}  limit 13
+  FILTER NOT EXISTS {?item wdt:P6947 ?gr}.
+}

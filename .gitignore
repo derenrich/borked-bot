@@ -1,3 +1,14 @@
+# pywikibot
+pywikibot.lwp
+throttle.ctrl
+apicache-py3/
+
+# credentials
+credentials.py
+
+# editor
+*~
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

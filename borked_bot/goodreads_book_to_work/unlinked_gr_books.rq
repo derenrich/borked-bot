@@ -1,0 +1,8 @@
+SELECT distinct ?item
+WHERE
+{
+  ?item wdt:P2969 ?book_id.  
+  FILTER NOT EXISTS {?item wdt:P629 ?ver}.
+  FILTER NOT EXISTS {?item wdt:P8383 ?gr}.
+  FILTER NOT EXISTS {?item wdt:P6947 ?gr}.
+} limit 5
