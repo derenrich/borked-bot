@@ -1,0 +1,9 @@
+SELECT distinct ?item
+WHERE 
+{
+  ?item wdt:P2969 ?book_id.  
+  ?item wdt:P50 ?author.
+  ?author wdt:P31 wd:Q5.
+  
+  FILTER NOT EXISTS {?author wdt:P2963 ?auth}.
+} 
