@@ -5,4 +5,4 @@ WHERE
   FILTER NOT EXISTS {?item wdt:P629 ?ver}.
   FILTER NOT EXISTS {?item wdt:P8383 ?gr}.
   FILTER NOT EXISTS {?item wdt:P6947 ?gr}.
-} limit 5
+  } limit 5500
