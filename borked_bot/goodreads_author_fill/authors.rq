@@ -1,0 +1,6 @@
+
+SELECT distinct ?item
+WHERE
+{
+  ?item wdt:P2963 ?author.
+}
