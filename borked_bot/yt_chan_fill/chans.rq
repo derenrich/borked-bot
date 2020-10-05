@@ -1,0 +1,8 @@
+
+SELECT distinct ?item
+WHERE
+{
+  ?item p:P2397 ?yt.
+  #FILTER  EXISTS {?yt pq:P1810 ?name.}
+  #FILTER  EXISTS {?yt pq:P3744 ?c.} 
+} #limit 20 offset 151
