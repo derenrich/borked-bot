@@ -3,6 +3,7 @@ import pywikibot
 import datetime
 import logging
 import time
+from datetime import timezone
 
 MAX_LAG_BACKOFF_SECS = 10 * 60
 
@@ -44,28 +45,27 @@ def update_qualifiers(repo, claim, qualifiers, comment=""):
     qualifiers = [q for q in qualifiers if not claim.has_qualifier(q.getID(), q.getTarget())]
     props = set([q.getID() for q in qualifiers])
 
-    removed_quals = []
-
-    if len(props) == 1 and p[0].getID() == 'P585':
+    if len(props) == 1 and list(props)[0] == 'P585':
         # never bother to just update point in time properties
         return
-    
+
+    removed_quals = []
     for p in props:
         removed_quals += claim.qualifiers.get(p, [])
+    claim.removeQualifiers(removed_quals, summary="Removing old qualifiers before update")
+
     for q in qualifiers:
         claim.addQualifier(q, summary=comment)
-    claim.removeQualifiers(removed_quals, summary="Removing old qualifiers after update")
-
 
 def retrieved_claim(repo):
-    today = datetime.date.today()
+    today = datetime.datetime.now(timezone.utc)
     now = pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
     retrieved = pywikibot.Claim(repo, u'P813')
     retrieved.setTarget(now)
     return retrieved
 
 def point_in_time_claim(repo):
-    today = datetime.date.today()
+    today = datetime.datetime.now(timezone.utc)
     now = pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
     retrieved = pywikibot.Claim(repo, u'P585', is_qualifier=True)
     retrieved.setTarget(now)
@@ -74,3 +74,6 @@ def point_in_time_claim(repo):
 
 def make_quantity(val, repo):
     return pywikibot.WbQuantity(val, site=repo)
+
+def make_date(year, month, day):
+    return pywikibot.WbTime(year=year, month=month, day=day)

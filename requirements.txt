@@ -8,3 +8,4 @@ ratelimiter==1.2.0.post0
 isbnlib
 tqdm
 lxml
+google-api-python-client

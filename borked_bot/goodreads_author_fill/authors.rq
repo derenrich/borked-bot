@@ -2,5 +2,10 @@
 SELECT distinct ?item
 WHERE
 {
-  ?item wdt:P2963 ?author.
+  ?item p:P2963 ?author.
+
+ #?author pq:P1810 ?name.
+ #FILTER NOT EXISTS {?author pq:P1810 ?name.}
+ #FILTER NOT EXISTS {?author pq:P3744 ?c.} 
+
 }
