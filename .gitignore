@@ -8,6 +8,7 @@ credentials.py
 
 # editor
 *~
+\#*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
