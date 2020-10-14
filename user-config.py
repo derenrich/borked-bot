@@ -6,4 +6,6 @@ usernames['wikidata']['wikidata'] = 'BorkedBot'
 
 console_encoding = 'utf-8'
 maxlag = 5
+max_retries = 100000
+maxthrottle = 120
 put_throttle = 3
