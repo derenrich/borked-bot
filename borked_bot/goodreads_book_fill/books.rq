@@ -1,0 +1,9 @@
+
+SELECT distinct ?item
+WHERE
+{
+  ?item p:P2969 ?book.
+
+ #?book pq:P1810 ?name.
+ FILTER NOT EXISTS {?book pq:P1810 ?name.}
+}
