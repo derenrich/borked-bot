@@ -2,10 +2,14 @@
 SELECT distinct ?item
 WHERE
 {
-  ?item p:P2963 ?author.
+ VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+
+
+ ?item p:P2963 ?author.
+ ?author wikibase:rank ?goodRanks.
 
  #?author pq:P1810 ?name.
  #FILTER NOT EXISTS {?author pq:P1810 ?name.}
- #FILTER NOT EXISTS {?author pq:P3744 ?c.} 
+ #FILTER NOT EXISTS {?author pq:P3744 ?c.}
 
 }
