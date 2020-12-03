@@ -8,7 +8,6 @@ def make_yt_client():
     api_version = "v3"
     api_key = CREDENTIALS['youtube']
     
-
     youtube = build(api_service_name, api_version, developerKey=api_key)
     return youtube
 

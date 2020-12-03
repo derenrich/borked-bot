@@ -9,3 +9,4 @@ isbnlib
 tqdm
 lxml
 google-api-python-client
+python-dateutil

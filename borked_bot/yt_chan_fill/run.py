@@ -11,8 +11,10 @@ import isbnlib
 from lxml import etree
 from io import StringIO, BytesIO
 from datetime import datetime
+from dateutil.parser import isoparse
 
-yt_limiter = RateLimiter(max_calls=1, period=10)
+# we can do 10k queries per day or one every 0.11 seconds
+yt_limiter = RateLimiter(max_calls=11, period=100)
 yt = make_yt_client()
 session = get_session()
 
@@ -45,7 +47,7 @@ def make_quals(repo, video_count, sub_count, view_count, title, start_time):
         quals.append(view_count_claim)
     if start_time:
         start_claim = pywikibot.Claim(repo, START_TIME, is_qualifier=True)
-        start = datetime.fromisoformat(start_time.replace('Z',''))        
+        start = isoparse(start_time)
         start_claim.setTarget(make_date(start.year, start.month, start.day))
         quals.append(start_claim)
     quals.append(point_in_time_claim(repo))        
@@ -67,11 +69,13 @@ def fetch_batch(items):
     for item in items:
         d = item.get()
         yt_chans = get_valid_claims(d, YT_CHAN_ID)
-        chans += [chan.getTarget() for chan in yt_chans]
+        chans += [chan.getTarget() for chan in yt_chans if chan.getTarget()]
     with yt_limiter:
         res = batch_list_chan(yt, chans)
     return res
 
+
+count = 0
 for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
     d = item.get()
     yt_chans = get_valid_claims(d, YT_CHAN_ID)
@@ -79,6 +83,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
         yt_chan_id = yt_chan_claim.getTarget()
         if yt_chan_id in fetch:
             data = fetch[yt_chan_id]
+            # TODO: detect autogen channels (as in https://www.wikidata.org/w/index.php?title=Q7405619&diff=prev&oldid=1316612455)
             video_count = data.get('statistics', {}).get('videoCount')
             sub_count = data.get('statistics', {}).get('subscriberCount')
             view_count = data.get('statistics',{}).get('viewCount')
@@ -86,5 +91,9 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
             start_time =  data.get('snippet', {}).get('publishedAt')
             quals = make_quals(repo, video_count, sub_count, view_count, title, start_time)
             update_qualifiers(repo, yt_chan_claim, quals, "update youtube data")
+            count += 1
+        else:
+            pass
+print(f"updated {count} entries")
 
 
