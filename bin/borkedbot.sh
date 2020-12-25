@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Management script for stashbot kubernetes processes
+# Management script for borkedbot kubernetes processes
 # Adapted from https://phabricator.wikimedia.org/F33972266
 
 set -e
@@ -26,22 +26,22 @@ _get_pod() {
 
 case "$1" in
     start)
-        echo "Starting stashbot k8s deployment..."
+        echo "Starting borkedbot k8s deployment..."
         $KUBECTL create --validate=true -f ${TOOL_DIR}/etc/deployment.yaml
         ;;
     run)
         date +%Y-%m-%dT%H:%M:%S
-        echo "Running stashbot..."
+        echo "Running borkedbot..."
         cd ${TOOL_DIR}
-        exec python stashbot.py --config ${CONFIG}
+        exec python borkedbot.py --config ${CONFIG}
         ;;
     stop)
-        echo "Stopping stashbot k8s deployment..."
+        echo "Stopping borkedbot k8s deployment..."
         $KUBECTL delete deployment ${DEPLOYMENT}
         # FIXME: wait for the pods to stop
         ;;
     restart)
-        echo "Restarting stashbot pod..."
+        echo "Restarting borkedbot pod..."
         exec $KUBECTL delete pod $(_get_pod)
         ;;
     status)

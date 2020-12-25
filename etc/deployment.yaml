@@ -23,7 +23,7 @@ spec:
       containers:
         - name: bot
           image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest
-          command: [ "/data/project/borkedbot/bin/borkedbot.sh", "run" ]
+          command: [ "/data/project/borkedbot/borked-bot/bin/borkedbot.sh", "run" ]
           workingDir: /data/project/borkedbot
           env:
             - name: HOME
