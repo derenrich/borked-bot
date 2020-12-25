@@ -19,6 +19,10 @@ def batch_list_chan(yt, ids):
                              id=grouped_ids)
     res = req.execute()
     out = dict()
+
+    if 'items' not in res:
+        return out
+
     for c in res['items']:
         out[c['id']] = c
     return out

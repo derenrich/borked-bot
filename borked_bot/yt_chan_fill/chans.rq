@@ -7,7 +7,8 @@ WHERE
   ?yt wikibase:rank ?goodRanks.
   ?yt ps:P2397 ?ytChan.
   FILTER (!isBlank(?ytChan)).
-  FILTER EXISTS { ?item p:P2002 ?t. }  
-  FILTER NOT EXISTS {?yt pq:P1810 ?name.}
-  FILTER NOT EXISTS {?yt pq:P3744 ?c.} 
-}
+  #FILTER EXISTS { ?item p:P2002 ?t. }
+  FILTER NOT EXISTS { ?yt pq:P585 ?p. }
+  #FILTER NOT EXISTS {?yt pq:P1810 ?name.}
+  #FILTER NOT EXISTS {?yt pq:P3744 ?c.} 
+} 

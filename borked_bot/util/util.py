@@ -3,13 +3,42 @@ import pywikibot
 import datetime
 import logging
 import time
+import sys
 from datetime import timezone
 
 MAX_LAG_BACKOFF_SECS = 10 * 60
 
+def get_item(item):
+    try:
+        return item.get()
+    except pywikibot.exceptions.NoPage:
+        return None
+
+def retry(count=3, wait=1, exceptions=[pywikibot.data.api.APIError]):
+    def retrier(f):
+        def wrapped_f(*args, retry_count = 0, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except:
+                excp_type, excp_val, _ = sys.exc_info()
+                if retry_count >= count:
+                    raise excp_val
+                for e in exceptions:
+                    if issubclass(excp_type, e):
+                        logging.error(f"Failed attempt {retry_count}, retrying: {excp_type} {excp_val}")
+                        time.sleep(wait)
+                        return wrapped_f(*args, **kwargs, retry_count=retry_count+1)
+                raise excp_val
+        return wrapped_f
+    return retrier
+
+
 def get_valid_claims(item, prop_id):
     claims = item['claims'].get(prop_id, [])
     return [c for c in claims if c.getRank() != "deprecated"]
+
+def get_valid_qualifier_values(claim, qual_id):
+    return [q.getTarget() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
 def get_session():
     s = requests.Session()
@@ -34,6 +63,7 @@ def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="
         logging.error("max lag timeout. sleeping. failed to add claim for prop %s", prop, exc_info=ex)
         time.sleep(MAX_LAG_BACKOFF_SECS)
 
+@retry()
 def update_qualifiers(repo, claim, qualifiers, comment=""):
     for q in qualifiers:
         if not q.isQualifier:
@@ -77,3 +107,4 @@ def make_quantity(val, repo):
 
 def make_date(year, month, day):
     return pywikibot.WbTime(year=year, month=month, day=day)
+
