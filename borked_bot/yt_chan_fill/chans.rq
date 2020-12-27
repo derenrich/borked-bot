@@ -7,6 +7,10 @@ WHERE
   ?yt wikibase:rank ?goodRanks.
   ?yt ps:P2397 ?ytChan.
   FILTER (!isBlank(?ytChan)).
+  # don't look at dead yt accounts
+  FILTER NOT EXISTS { ?yt pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?yt pq:1534 ?endCause. }
+  
   #FILTER EXISTS { ?item p:P2002 ?t. }
   FILTER NOT EXISTS { ?yt pq:P585 ?p. }
   #FILTER NOT EXISTS {?yt pq:P1810 ?name.}

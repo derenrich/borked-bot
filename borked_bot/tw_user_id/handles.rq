@@ -6,6 +6,10 @@ WHERE
   ?twt wikibase:rank ?goodRanks.
   ?twt ps:P2002 ?twtName.
   FILTER (!isBlank(?twtName)).
+  # don't look at dead accounts
+  FILTER NOT EXISTS { ?twt pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?twt pq:1534 ?endCause. }
+  
   FILTER NOT EXISTS { ?twt pq:P6552 ?twId. }
   #FILTER NOT EXISTS { ?twt pq:P585 ?time. }
   FILTER NOT EXISTS { ?twt pq:P3744 ?subs. }
