@@ -7,7 +7,6 @@ WHERE
   ?twt ps:P2002 ?twtName.
   FILTER (!isBlank(?twtName)).
   FILTER NOT EXISTS { ?twt pq:P6552 ?twId. }
-  FILTER NOT EXISTS { ?twt pq:P585 ?time. }  
+  #FILTER NOT EXISTS { ?twt pq:P585 ?time. }
+  FILTER NOT EXISTS { ?twt pq:P3744 ?subs. }
 }
-
-
