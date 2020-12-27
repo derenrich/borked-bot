@@ -1,0 +1,13 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P2002 ?twt.
+  ?twt wikibase:rank ?goodRanks.
+  ?twt ps:P2002 ?twtName.
+  FILTER (!isBlank(?twtName)).
+  FILTER NOT EXISTS { ?twt pq:P6552 ?twId. }
+  FILTER NOT EXISTS { ?twt pq:P585 ?time. }  
+}
+
+

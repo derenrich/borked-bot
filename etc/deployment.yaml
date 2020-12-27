@@ -1,7 +1,7 @@
 ---
 # Run borkedbot on kubernetes
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
   name: borkedbot.bot
   namespace: tool-borkedbot
@@ -9,17 +9,15 @@ metadata:
     name: borkedbot.bot
     toolforge: tool
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: borkedbot.bot
-      toolforge: tool
+  ttlSecondsAfterFinished: 60  
   template:
     metadata:
       labels:
         name: borkedbot.bot
         toolforge: tool
     spec:
+      activeDeadlineSeconds: 604800
+      restartPolicy: OnFailure      
       containers:
         - name: bot
           image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest

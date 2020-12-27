@@ -26,7 +26,7 @@ YT_CHAN_ID = 'P2397'
 NAMED_AS = 'P1810' # snippet.title	
 START_TIME = 'P580' # snippet.publishedAt
 POINT_IN_TIME = 'P585'
-MIN_DATA_AGE_DAYS = 14
+MIN_DATA_AGE_DAYS = 60
 MAX_YT_PER_REQ = 50
 
 def make_quals(repo, video_count, sub_count, view_count, title, start_time):

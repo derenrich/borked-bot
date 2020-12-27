@@ -10,7 +10,7 @@ POD_NAME=borkedbot.bot
 CONFIG=etc/config-k8s.yaml
 
 TOOL_DIR=$(cd $(dirname $0)/.. && pwd -P)
-VENV=${TOOL_DIR}/venv-k8s-py37
+VENV=${TOOL_DIR}/../venv-k8s-py37
 if [[ -f ${VENV}/bin/activate ]]; then
     # Enable virtualenv
     source ${VENV}/bin/activate
@@ -33,11 +33,11 @@ case "$1" in
         date +%Y-%m-%dT%H:%M:%S
         echo "Running borkedbot..."
         cd ${TOOL_DIR}
-        exec python borkedbot.py --config ${CONFIG}
+        exec python -m borked_bot.yt_chan_fill  #--config ${CONFIG}
         ;;
     stop)
-        echo "Stopping borkedbot k8s deployment..."
-        $KUBECTL delete deployment ${DEPLOYMENT}
+        echo "Stopping borkedbot k8s job..."
+        $KUBECTL delete job ${DEPLOYMENT}
         # FIXME: wait for the pods to stop
         ;;
     restart)
