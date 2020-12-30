@@ -13,6 +13,8 @@ from io import StringIO, BytesIO
 from datetime import datetime
 from dateutil.parser import isoparse
 import random
+import traceback
+import sys
 
 # we can do 10k queries per day or one every 0.11 seconds
 yt_limiter = RateLimiter(max_calls=11, period=100)
@@ -91,26 +93,29 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
     yt_chans = get_valid_claims(d, YT_CHAN_ID)
     
     for yt_chan_claim in yt_chans:
-        yt_chan_id = yt_chan_claim.getTarget()
-        points_in_time = get_valid_qualifier_values(yt_chan_claim, POINT_IN_TIME)
-        if points_in_time:
-            max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
-            if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
-                # don't update new data
-                continue
-        if yt_chan_id in fetch:
-            data = fetch[yt_chan_id]
-            # TODO: detect autogen channels (as in https://www.wikidata.org/w/index.php?title=Q7405619&diff=prev&oldid=1316612455)
-            video_count = data.get('statistics', {}).get('videoCount')
-            sub_count = data.get('statistics', {}).get('subscriberCount')
-            view_count = data.get('statistics',{}).get('viewCount')
-            title = data.get('snippet',{}).get('title')
-            start_time =  data.get('snippet', {}).get('publishedAt')
-            quals = make_quals(repo, video_count, sub_count, view_count, title, start_time)
-            update_qualifiers(repo, yt_chan_claim, quals, "update youtube data")
-            count += 1
-        else:
-            pass
+        try:
+            yt_chan_id = yt_chan_claim.getTarget()
+            points_in_time = get_valid_qualifier_values(yt_chan_claim, POINT_IN_TIME)
+            if points_in_time:
+                max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
+                if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
+                    # don't update new data
+                    continue
+            if yt_chan_id in fetch:
+                data = fetch[yt_chan_id]
+                # TODO: detect autogen channels (as in https://www.wikidata.org/w/index.php?title=Q7405619&diff=prev&oldid=1316612455)
+                video_count = data.get('statistics', {}).get('videoCount')
+                sub_count = data.get('statistics', {}).get('subscriberCount')
+                view_count = data.get('statistics',{}).get('viewCount')
+                title = data.get('snippet',{}).get('title')
+                start_time =  data.get('snippet', {}).get('publishedAt')
+                quals = make_quals(repo, video_count, sub_count, view_count, title, start_time)
+                update_qualifiers(repo, yt_chan_claim, quals, "update youtube data")
+                count += 1
+            else:
+                pass
+        except ValueError:
+            traceback.print_exception(*sys.exc_info())
 print(f"updated {count} entries")
 
 
