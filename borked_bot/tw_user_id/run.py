@@ -1,4 +1,6 @@
 import pywikibot
+import traceback
+import sys
 from pywikibot import pagegenerators as pg
 import pathlib
 from ratelimiter import RateLimiter
@@ -86,24 +88,30 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
         continue
     twt_handles = get_valid_claims(d, TWITTER_USERNAME)    
     for twt_handle_claim in twt_handles:
-        twt_handle = twt_handle_claim.getTarget().lower()
-        points_in_time = get_valid_qualifier_values(twt_handle_claim, POINT_IN_TIME)
-        if points_in_time:
-            max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
-            if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
-                # don't update new data
+        try:
+            target = twt_handle_claim.getTarget()
+            if not target:
                 continue
-        if twt_handle in fetch:
-            data = fetch[twt_handle]
-            start_time = data.get('created_at')
-            twt_id = data.get('id')
-            verified = data.get('verified')
-            quals = make_quals(repo, twt_id, verified, start_time)
-            
-            update_qualifiers(repo, twt_handle_claim, quals, "update twitter data")
-            count += 1
-        else:
-            pass
+            twt_handle = target.lower()
+            points_in_time = get_valid_qualifier_values(twt_handle_claim, POINT_IN_TIME)
+            if points_in_time:
+                max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
+                if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
+                    # don't update new data
+                    continue
+            if twt_handle in fetch:
+                data = fetch[twt_handle]
+                start_time = data.get('created_at')
+                twt_id = data.get('id')
+                verified = data.get('verified')
+                quals = make_quals(repo, twt_id, verified, start_time)
+                update_qualifiers(repo, twt_handle_claim, quals, "update twitter data")
+                count += 1
+            else:
+                pass
+        except ValueError:
+            traceback.print_exception(*sys.exc_info())
+
 print(f"updated {count} entries")
 
 
