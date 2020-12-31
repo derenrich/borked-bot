@@ -40,6 +40,9 @@ def get_valid_claims(item, prop_id):
 def get_valid_qualifier_values(claim, qual_id):
     return [q.getTarget() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
+def get_all_qualifier_values(claim, qual_id):
+    return [q.getTarget() for q in claim.qualifiers.get(qual_id, [])]
+
 def get_session():
     s = requests.Session()
     s.headers.update({'User-Agent': 'BorkedBot[Wikidata]'})

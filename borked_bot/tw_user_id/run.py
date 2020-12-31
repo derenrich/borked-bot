@@ -31,6 +31,7 @@ VERIFIED = 'Q28378282'
 TWITTER_ID = 'P6552'
 NAMED_AS = 'P1810' # snippet.title	
 START_TIME = 'P580' # snippet.publishedAt
+END_TIME = 'P582'
 POINT_IN_TIME = 'P585'
 MIN_DATA_AGE_DAYS = 14
 MAX_YT_PER_REQ = 50
@@ -54,6 +55,16 @@ def make_quals(repo, twt_id, verified, start_time):
     quals.append(point_in_time_claim(repo))        
     return quals
 
+def make_blank_quals(repo):
+    quals = []
+    twt_id_claim = pywikibot.Claim(repo, TWITTER_ID, is_qualifier=True)
+    twt_id_claim.setSnakType('somevalue')
+    quals.append(twt_id_claim)
+    end_claim = pywikibot.Claim(repo, END_TIME, is_qualifier=True)
+    end_claim.setSnakType('somevalue')
+    quals.append(end_claim)
+    quals.append(point_in_time_claim(repo))
+    return quals
 
 WD = str(pathlib.Path(__file__).parent.absolute())
 
@@ -73,12 +84,14 @@ def fetch_batch(items):
             continue
         tw_handles = get_valid_claims(d, TWITTER_USERNAME)
         handles += [tw.getTarget() for tw in tw_handles if tw.getTarget()]
-    if len(handles) > MAX_USERS_PER_REQ:
-        # yes this does mean we will drop some on the floor. not optimal...
-        random.shuffle(handles)
-        handles = handles[0:MAX_USERS_PER_REQ]
-    with twt_limiter:
-        res = batch_get_twitter(s, handles)
+    def get_batch_handles(handles):
+        with twt_limiter:
+            res = batch_get_twitter(s, handles)
+        return res
+    res = {}
+    results = batcher(handles, get_batch_handles, MAX_USERS_PER_REQ)
+    for _, fetch in results:
+        res.update(dict(fetch))
     return res
 
 count = 0
@@ -86,7 +99,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
     d = get_item(item)
     if not d:
         continue
-    twt_handles = get_valid_claims(d, TWITTER_USERNAME)    
+    twt_handles = get_valid_claims(d, TWITTER_USERNAME)
     for twt_handle_claim in twt_handles:
         try:
             target = twt_handle_claim.getTarget()
@@ -94,6 +107,9 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 continue
             twt_handle = target.lower()
             points_in_time = get_valid_qualifier_values(twt_handle_claim, POINT_IN_TIME)
+            twt_ids = get_all_qualifier_values(twt_handle_claim, TWITTER_ID)
+            if twt_ids:
+                continue
             if points_in_time:
                 max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
                 if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
@@ -108,7 +124,11 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 update_qualifiers(repo, twt_handle_claim, quals, "update twitter data")
                 count += 1
             else:
-                pass
+                quals = make_blank_quals(repo)
+                update_qualifiers(repo, twt_handle_claim, quals, "mark twitter data as bad")
+                count += 1
+
+
         except ValueError:
             traceback.print_exception(*sys.exc_info())
 
