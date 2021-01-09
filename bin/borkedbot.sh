@@ -40,6 +40,7 @@ case "$1" in
         echo "Running borkedbot youtube filler..."
         cd ${TOOL_DIR}
         exec python -m borked_bot.yt_chan_fill
+        ;;
     stop)
         echo "Stopping borkedbot k8s job..."
         $KUBECTL delete job ${DEPLOYMENT}

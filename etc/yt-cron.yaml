@@ -1,7 +1,7 @@
 ---
 # Run borkedbot yt job on kubernetes
-apiVersion: batch/v1beta
-kind: Job
+apiVersion: batch/v1beta1
+kind: CronJob
 metadata:
   name: borkedbot.bot-yt
   namespace: tool-borkedbot
@@ -11,7 +11,6 @@ metadata:
 spec:
   schedule: "@weekly"
   concurrencyPolicy: Forbid
-  ttlSecondsAfterFinished: 60  
   jobTemplate:
     spec:
       template:
