@@ -33,7 +33,7 @@ NAMED_AS = 'P1810' # snippet.title
 START_TIME = 'P580' # snippet.publishedAt
 END_TIME = 'P582'
 POINT_IN_TIME = 'P585'
-MIN_DATA_AGE_DAYS = 14
+MIN_DATA_AGE_DAYS = 45
 MAX_YT_PER_REQ = 50
 
 def make_quals(repo, twt_id, verified, start_time):
