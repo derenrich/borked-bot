@@ -9,7 +9,7 @@ metadata:
     name: borkedbot.bot
     toolforge: tool
 spec:
-  ttlSecondsAfterFinished: 60  
+  ttlSecondsAfterFinished: 10800
   template:
     metadata:
       labels:
@@ -17,7 +17,7 @@ spec:
         toolforge: tool
     spec:
       activeDeadlineSeconds: 604800
-      restartPolicy: OnFailure      
+      restartPolicy: Never
       containers:
         - name: bot
           image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest
