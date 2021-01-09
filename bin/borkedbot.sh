@@ -33,8 +33,13 @@ case "$1" in
         date +%Y-%m-%dT%H:%M:%S
         echo "Running borkedbot..."
         cd ${TOOL_DIR}
-        exec python -m borked_bot.yt_chan_fill  #--config ${CONFIG}
+        exec python -m borked_bot.tw_follows  #--config ${CONFIG}
         ;;
+    run-yt)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot youtube filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.yt_chan_fill
     stop)
         echo "Stopping borkedbot k8s job..."
         $KUBECTL delete job ${DEPLOYMENT}
