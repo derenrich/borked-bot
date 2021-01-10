@@ -1,20 +1,23 @@
 from ..credentials import CREDENTIALS
 from .util import retry
 from requests.exceptions import ReadTimeout
+import re
 
 HANDLE_ROOT_URL = "https://api.twitter.com/2/users/by"
 ID_ROOT_URL = "https://api.twitter.com/2/users"
+
+USERNAME_REGEX = re.compile(r"^[0-9]{1,19}$")
 
 class TwitterError(Exception): pass
 
 @retry(exceptions=[ReadTimeout, TwitterError])
 def batch_get_twitter(session, handles, mode="handles", extra_fields=[]):
-    handles = ','.join(handles)
     params = {}
     if mode == "handles":
-        params['usernames'] = handles
+        params['usernames'] = ','.join(handles)
     elif mode == "ids":
-        params['ids'] = handles
+        handles = [h for h in handles if USERNAME_REGEX.match(h)]
+        params['ids'] = ','.join(handles)
     else:
         raise RuntimeError(f"invalid mode {mode} must be 'handles' or 'ids'")
     params['user.fields'] = ','.join(['created_at,verified'] + extra_fields)
