@@ -90,7 +90,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
             if twt_id in fetch:
                 data = fetch[twt_id]
                 followers = data.get('public_metrics', {}).get('followers_count')
-                if followers and followers > 1000:
+                if followers and followers >= 10000:
                     follower_quant = make_quantity(followers, repo)
                     quals = make_quals(repo, twt_id)
                     add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add follower count")
