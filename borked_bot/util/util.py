@@ -39,6 +39,9 @@ def get_valid_claims(item, prop_id):
     claims = item['claims'].get(prop_id, [])
     return [c for c in claims if c.getRank() != "deprecated"]
 
+def get_valid_qualifier(claim, qual_id):
+    return [q for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
+
 def get_valid_qualifier_values(claim, qual_id):
     return [q.getTarget() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
@@ -99,9 +102,10 @@ def retrieved_claim(repo):
     retrieved.setTarget(now)
     return retrieved
 
-def point_in_time_claim(repo):
+
+def point_in_time_claim(repo, time=None):
     today = datetime.datetime.now(timezone.utc)
-    now = pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
+    now = time or pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
     retrieved = pywikibot.Claim(repo, u'P585', is_qualifier=True)
     retrieved.setTarget(now)
     return retrieved
