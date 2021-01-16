@@ -72,6 +72,9 @@ for item in tqdm(generator):
     d = get_item(item)
     if not d:
         continue
+    if len(get_valid_claims(d, FOLLOWERS)) > 1:
+        # we already backfilled this
+        continue
     twt_handles = get_valid_claims(d, TWITTER_USERNAME)
     twt_ids = list(map(str, sum([get_valid_qualifier_values(t, TWITTER_ID) for t in twt_handles], [])))
     if len(twt_ids) != 1:
@@ -92,12 +95,14 @@ for item in tqdm(generator):
                 quals = make_quals(repo, twt_ids[0], point_in_time_claim(repo, times[0]))
                 add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="backfill follower count")
                 count += 1
+                update_twitter_sub(d)
                 #if count > 10:
                 #    exit()
             else:
                 pass
         except ValueError:
             traceback.print_exception(*sys.exc_info())
+            #exit()
 
 print(f"updated {count} entries")
 

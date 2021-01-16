@@ -1,6 +1,8 @@
 from ..credentials import CREDENTIALS
-from .util import retry
+#from .util import retry
+from .util import *
 from requests.exceptions import ReadTimeout
+from itertools import groupby
 import re
 
 HANDLE_ROOT_URL = "https://api.twitter.com/2/users/by"
@@ -42,3 +44,22 @@ def batch_get_twitter(session, handles, mode="handles", extra_fields=[]):
     else:
         raise TwitterError(f"Twitter API Error: {r.content}")
  
+
+def update_twitter_sub(item):
+    FOLLOWERS = 'P8687'
+    POINT_IN_TIME = 'P585'
+    TWITTER_ID = 'P6552'
+    
+    follower_claims = get_valid_claims(item, FOLLOWERS)
+    twitter_follower_claims = [c for c in follower_claims if len(get_valid_qualifier_values(c, TWITTER_ID)) == 1]
+    id_counts = groupby(twitter_follower_claims, lambda c: get_valid_qualifier_values(c, TWITTER_ID)[0])
+    for twt_id, claims in id_counts:
+        claims = list(claims)
+        if len(claims) > 1:
+            newest_date = max([max(get_valid_qualifier_times(c, POINT_IN_TIME)) for c in claims])
+            for c in claims:
+                if max(get_valid_qualifier_times(c, POINT_IN_TIME)) < newest_date:
+                    if c.rank != 'normal':
+                        c.changeRank('normal')
+                else:
+                    c.changeRank('preferred')
