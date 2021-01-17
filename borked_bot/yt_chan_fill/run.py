@@ -37,15 +37,15 @@ def make_quals(repo, video_count, sub_count, view_count, title, start_time):
         named_as_claim = pywikibot.Claim(repo, NAMED_AS, is_qualifier=True)
         named_as_claim.setTarget(title.strip())
         quals.append(named_as_claim)
-    if sub_count and sub_count > 0:
+    if sub_count and int(sub_count) > 0:
         sub_count_claim = pywikibot.Claim(repo, NUMBER_OF_FOLLOWERS, is_qualifier=True)
         sub_count_claim.setTarget(make_quantity(int(sub_count), repo))
         quals.append(sub_count_claim)
-    if video_count and video_count > 0:
+    if video_count and int(video_count) > 0:
         video_count_claim = pywikibot.Claim(repo, NUMBER_OF_WORKS, is_qualifier=True)
         video_count_claim.setTarget(make_quantity(int(video_count), repo))
         quals.append(video_count_claim)
-    if view_count and view_count > 0:
+    if view_count and int(view_count) > 0:
         view_count_claim = pywikibot.Claim(repo, VIEW_COUNT, is_qualifier=True)
         view_count_claim.setTarget(make_quantity(int(view_count), repo))
         quals.append(view_count_claim)
