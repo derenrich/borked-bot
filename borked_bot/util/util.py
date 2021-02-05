@@ -39,17 +39,45 @@ def get_valid_claims(item, prop_id):
     claims = item['claims'].get(prop_id, [])
     return [c for c in claims if c.getRank() != "deprecated"]
 
+def get_qualifiers(claim, qual_id):
+    return [q for q in claim.qualifiers.get(qual_id, [])]
+
 def get_valid_qualifier(claim, qual_id):
     return [q for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
 def get_valid_qualifier_values(claim, qual_id):
     return [q.getTarget() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
+def get_all_qualifier_values(claim, qual_id):
+    return [q.getTarget() for q in claim.qualifiers.get(qual_id, [])]
+
 def get_valid_qualifier_times(claim, qual_id):
     return [q.getTarget().toTimestamp() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
 
-def get_all_qualifier_values(claim, qual_id):
-    return [q.getTarget() for q in claim.qualifiers.get(qual_id, [])]
+def get_best_claim(item, prop_id):
+    """
+    returns a singular best claim if it exists
+    """
+    claims = item['claims'].get(prop_id, [])
+    best = None
+    rank = None
+    matched_rank = False
+    for c in claims:
+        # not deprecated and no end time
+        claim_rank = c.getRank()
+        if claim_rank != "deprecated" and not get_qualifiers(c, 'P582'):
+            if claim_rank == rank:
+                matched_rank = True
+            elif claim_rank == 'preferred':
+                best = c
+                rank = claim_rank
+                matched_rank = False
+            elif not rank:
+                best = c
+                rank = claim_rank
+    if best and not matched_rank:
+        return best
+    return None
 
 def get_session():
     s = requests.Session()

@@ -73,6 +73,7 @@ for item in tqdm(generator):
     if not d:
         continue
     if len(get_valid_claims(d, FOLLOWERS)) > 1:
+        update_twitter_sub(d)
         # we already backfilled this
         continue
     twt_handles = get_valid_claims(d, TWITTER_USERNAME)

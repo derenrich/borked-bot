@@ -79,11 +79,12 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
     d = get_item(item)
     if not d:
         continue
-    twt_handles = get_valid_claims(d, TWITTER_USERNAME)
-    ends = sum([get_valid_qualifier_values(t, END_TIME) for t in twt_handles], [])
-    twt_ids = list(map(str, sum([get_valid_qualifier_values(t, TWITTER_ID) for t in twt_handles], [])))
-    if len(twt_ids) > 1 or len(ends) > 0:
-        # for now ignore this case
+
+    twt_claim = get_best_claim(d, TWITTER_USERNAME)
+    if not twt_claim:
+        continue
+    twt_ids = get_valid_qualifier_values(twt_claim, TWITTER_ID)
+    if len(twt_ids) != 1:
         continue
     for twt_id in twt_ids:
         try:
