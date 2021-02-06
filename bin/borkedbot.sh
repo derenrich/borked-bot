@@ -46,6 +46,12 @@ case "$1" in
         echo "Running borkedbot twitter filler..."
         cd ${TOOL_DIR}
         exec python -m borked_bot.tw_user_id
+        ;;
+    run-twt-fol)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot twitter follows filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.tw_follows
         ;;    
     stop)
         echo "Stopping borkedbot k8s job..."

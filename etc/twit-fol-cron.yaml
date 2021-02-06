@@ -1,0 +1,32 @@
+---
+# Run borkedbot yt job on kubernetes
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: borkedbot.bot-twit-fol
+  namespace: tool-borkedbot
+  labels:
+    name: borkedbot.bot-twit-fol
+    toolforge: tool
+spec:
+  schedule: "0 0 * * 2" # weekly on monday
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            name: borkedbot.bot-twit-fol
+            toolforge: tool
+        spec:
+          activeDeadlineSeconds: 604800
+          restartPolicy: OnFailure
+          containers:
+            - name: bot
+              image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest
+              command: [ "/data/project/borkedbot/borked-bot/bin/borkedbot.sh", "run-twt-fol" ]
+              workingDir: /data/project/borkedbot
+              env:
+                - name: HOME
+                  value: /data/project/borkedbot
+              imagePullPolicy: Always
