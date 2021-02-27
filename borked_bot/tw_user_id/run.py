@@ -106,7 +106,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
             if not target:
                 continue
             twt_handle = target.lower()
-            points_in_time = get_valid_qualifier_values(twt_handle_claim, POINT_IN_TIME)
+            points_in_time = get_present_qualifier_values(twt_handle_claim, POINT_IN_TIME)
             twt_ids = get_all_qualifier_values(twt_handle_claim, TWITTER_ID)
             if twt_ids:
                 continue

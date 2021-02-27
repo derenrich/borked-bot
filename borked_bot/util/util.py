@@ -39,22 +39,44 @@ def get_valid_claims(item, prop_id):
     claims = item['claims'].get(prop_id, [])
     return [c for c in claims if c.getRank() != "deprecated"]
 
+def get_matching_claim(item, prop_id, prop_value, qualifiers):
+    claims = get_valid_claims(item, prop_id)
+
+    for c in claims:
+        if prop_value:
+            print(prop_value, c.getTarget())
+            if c.getTarget() !=  prop_value:
+                continue
+        match = True
+        for qp_id, q_value in qualifiers.items():
+            q_values = get_valid_qualifier_values(c, qp_id)
+            if q_value not in q_values:
+                match = False
+                break
+        if match:
+            return c
+        
+            
 def get_qualifiers(claim, qual_id):
     return [q for q in claim.qualifiers.get(qual_id, [])]
 
 def get_valid_qualifier(claim, qual_id):
-    return [q for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
+    snak_values = set(['somevalue'])
+    return [q for q in claim.qualifiers.get(qual_id, []) if q.getTarget() or q.getSnakType() in snak_values]
 
 def get_valid_qualifier_values(claim, qual_id):
-    return [q.getTarget() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
+    return [q.getTarget() for q in get_valid_qualifier(claim, qual_id)]
+
+def get_present_qualifier_values(claim, qual_id):
+    return [q.getTarget() for q in get_valid_qualifier(claim, qual_id) if q.getTarget()]
 
 def get_all_qualifier_values(claim, qual_id):
     return [q.getTarget() for q in claim.qualifiers.get(qual_id, [])]
 
 def get_valid_qualifier_times(claim, qual_id):
-    return [q.getTarget().toTimestamp() for q in claim.qualifiers.get(qual_id, []) if q.getTarget()]
+    return [q.getTarget().toTimestamp() for q in get_valid_qualifier(claim, qual_id) if q.getTarget()]
 
-def get_best_claim(item, prop_id):
+def get_best_claim(item, prop_id, consider=lambda c: True):
     """
     returns a singular best claim if it exists
     """
@@ -65,7 +87,7 @@ def get_best_claim(item, prop_id):
     for c in claims:
         # not deprecated and no end time
         claim_rank = c.getRank()
-        if claim_rank != "deprecated" and not get_qualifiers(c, 'P582'):
+        if claim_rank != "deprecated" and not get_valid_qualifier(c, 'P582') and consider(c):
             if claim_rank == rank:
                 matched_rank = True
             elif claim_rank == 'preferred':
@@ -101,6 +123,25 @@ def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="
     except pywikibot.exceptions.MaxlagTimeoutError as ex:
         logging.error("max lag timeout. sleeping. failed to add claim for prop %s", prop, exc_info=ex)
         time.sleep(MAX_LAG_BACKOFF_SECS)
+
+def update_sources(claim, new_sources, comment=""):
+    if not new_sources:
+        return
+    cur_sources = claim.getSources()
+
+    update = True
+
+    BANNED_PID = set(['P585', 'P813']) # no time stuff
+    wanted_source_props = set([c.getID() for c in new_sources if c.getID() not in BANNED_PID])
+    wanted_source_targets = set([c.getTarget() for c in new_sources if c.getID() not in BANNED_PID])
+    for source_claims in cur_sources:
+        present_source_props = set([c for c in source_claims if c not in BANNED_PID])
+        present_source_targets = set([c.getTarget() for c in sum([v for (c, v) in source_claims.items() if c not in BANNED_PID],[])])
+        if present_source_props >= wanted_source_props and present_source_targets >= wanted_source_targets:
+            update = False
+    if update:
+        claim.addSources(new_sources, summary="adding sources", bot=True)
+
 
 @retry()
 def update_qualifiers(repo, claim, qualifiers, comment=""):
@@ -147,4 +188,18 @@ def make_quantity(val, repo):
 
 def make_date(year, month, day):
     return pywikibot.WbTime(year=year, month=month, day=day)
+
+
+
+class WikiLogger(object):
+
+    def __init__(self, page):
+        # site = pywikibot.Site('en', 'wikipedia')
+        # page = pywikibot.Page(site, 'Wikipedia:Sandbox')
+        self._page = page
+        self._text = self._page.get(True)
+    def append(self, line):
+        self._text = self._text + f"\n*{line}"
+        self._page.text = self._text
+        self._page.save('appending log line')
 

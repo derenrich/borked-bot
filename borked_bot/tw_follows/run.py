@@ -63,7 +63,7 @@ def fetch_batch(items):
         if not d:
             continue
         tw_handles = get_valid_claims(d, TWITTER_USERNAME)
-        tw_ids += map(str, sum([get_valid_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
+        tw_ids += map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
     def get_batch_handles(handles):
         with twt_limiter:
             res = batch_get_twitter(s, handles, mode='ids', extra_fields=['public_metrics'])
@@ -83,7 +83,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
     twt_claim = get_best_claim(d, TWITTER_USERNAME)
     if not twt_claim:
         continue
-    twt_ids = get_valid_qualifier_values(twt_claim, TWITTER_ID)
+    twt_ids = get_present_qualifier_values(twt_claim, TWITTER_ID)
     if len(twt_ids) != 1:
         continue
     for twt_id in twt_ids:

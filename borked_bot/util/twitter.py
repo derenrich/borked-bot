@@ -51,7 +51,7 @@ def update_twitter_sub(item):
     TWITTER_ID = 'P6552'
     
     follower_claims = get_valid_claims(item, FOLLOWERS)
-    twitter_follower_claims = [c for c in follower_claims if len(get_valid_qualifier_values(c, TWITTER_ID)) == 1]
+    twitter_follower_claims = [c for c in follower_claims if len(get_present_qualifier_values(c, TWITTER_ID)) == 1]
     id_counts = groupby(twitter_follower_claims, lambda c: get_valid_qualifier_values(c, TWITTER_ID)[0])
     for twt_id, claims in id_counts:
         claims = list(claims)

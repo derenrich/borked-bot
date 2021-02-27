@@ -1,0 +1,17 @@
+SELECT ?item
+WHERE 
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  # NASDAQ / NYSE
+  VALUES ?validExchanges {wd:Q13677 wd:Q82059}.
+  ?item p:P414 ?exchange.
+  ?exchange ps:P414 ?validExchanges.
+  ?exchange ps:P414 ?e.
+
+  ?exchange wikibase:rank ?goodRanks.
+  ?exchange pq:P249 ?ticker.
+  FILTER NOT EXISTS {?exchange pq:P582 ?end.}
+  FILTER NOT EXISTS {?item p:P576 ?endComp.}
+  FILTER NOT EXISTS {?item p:P582 ?endComp2.}  
+
+} 

@@ -55,7 +55,7 @@ def fetch_batch(items):
         if not d:
             continue
         tw_handles = get_valid_claims(d, TWITTER_USERNAME)
-        tw_ids += map(str, sum([get_valid_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
+        tw_ids += map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
     def get_batch_handles(handles):
         with twt_limiter:
             res = batch_get_twitter(s, handles, mode='ids', extra_fields=['public_metrics'])
@@ -77,15 +77,14 @@ for item in tqdm(generator):
         # we already backfilled this
         continue
     twt_handles = get_valid_claims(d, TWITTER_USERNAME)
-    twt_ids = list(map(str, sum([get_valid_qualifier_values(t, TWITTER_ID) for t in twt_handles], [])))
+    twt_ids = list(map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in twt_handles], [])))
     if len(twt_ids) != 1:
         # for now ignore this case
         continue
     for twt in twt_handles:
         try:
-            counts = get_valid_qualifier_values(twt, SUB_COUNT)
-            time_qs = get_valid_qualifier(twt, POINT_IN_TIME)
-            times = get_valid_qualifier_values(twt, POINT_IN_TIME)            
+            counts = get_present_qualifier_values(twt, SUB_COUNT)
+            times = get_present_qualifier_values(twt, POINT_IN_TIME)
             if len(counts) != 1 or len(times) != 1:
                 continue
             if (datetime.now() - times[0].toTimestamp() ).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:

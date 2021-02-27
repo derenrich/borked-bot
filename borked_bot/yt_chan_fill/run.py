@@ -95,7 +95,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
     for yt_chan_claim in yt_chans:
         try:
             yt_chan_id = yt_chan_claim.getTarget()
-            points_in_time = get_valid_qualifier_values(yt_chan_claim, POINT_IN_TIME)
+            points_in_time = get_present_qualifier_values(yt_chan_claim, POINT_IN_TIME)
             if points_in_time:
                 max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
                 if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
