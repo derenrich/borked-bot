@@ -44,7 +44,6 @@ def get_matching_claim(item, prop_id, prop_value, qualifiers):
 
     for c in claims:
         if prop_value:
-            print(prop_value, c.getTarget())
             if c.getTarget() !=  prop_value:
                 continue
         match = True
@@ -167,18 +166,18 @@ def update_qualifiers(repo, claim, qualifiers, comment=""):
     for q in qualifiers:
         claim.addQualifier(q, summary=comment)
 
-def retrieved_claim(repo):
+def retrieved_claim(repo, qualifier=False):
     today = datetime.datetime.now(timezone.utc)
     now = pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
-    retrieved = pywikibot.Claim(repo, u'P813')
+    retrieved = pywikibot.Claim(repo, u'P813', is_qualifier=qualifier)
     retrieved.setTarget(now)
     return retrieved
 
 
-def point_in_time_claim(repo, time=None):
-    today = datetime.datetime.now(timezone.utc)
-    now = time or pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
-    retrieved = pywikibot.Claim(repo, u'P585', is_qualifier=True)
+def point_in_time_claim(repo, time=None, prop=None):
+    today = time or datetime.datetime.now(timezone.utc)
+    now = pywikibot.WbTime(year=today.year, month=today.month, day=today.day)
+    retrieved = pywikibot.Claim(repo, prop or u'P585', is_qualifier=True)
     retrieved.setTarget(now)
     return retrieved
 
