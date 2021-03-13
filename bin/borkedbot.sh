@@ -52,7 +52,7 @@ case "$1" in
         echo "Running borkedbot twitter follows filler..."
         cd ${TOOL_DIR}
         exec python -m borked_bot.tw_follows
-        ;;    
+        ;;
     stop)
         echo "Stopping borkedbot k8s job..."
         $KUBECTL delete job ${DEPLOYMENT}
