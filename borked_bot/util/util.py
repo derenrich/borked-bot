@@ -190,6 +190,36 @@ def make_date(year, month, day):
 
 
 
+LANGS = {
+    'de': 'Q188',
+    'en': 'Q1860',
+    'en-US': 'Q1860',
+    'en-UK': 'Q1860',
+    'es': 'Q1321',
+    'it': 'Q652',
+    'eo': 'Q143',
+    'fr': 'Q150',
+    'ja': 'Q5287',
+    'pl': 'Q809',
+    'pt': 'Q5146',
+    'ro': 'Q7913',
+    'ru': 'Q7737',
+    'sv': 'Q9027',
+    'nl': 'Q7411',
+    'cs': 'Q9056',
+    'ca': 'Q7026',
+    'sr': 'Q9299',
+    'he': 'Q9288',
+    'zh': 'Q7850',
+    'ko': 'Q9176',
+    'zxx': 'Q22282939'
+}
+
+def parse_iso_lang(lang):
+    return LANGS.get(lang)
+
+
+
 class WikiLogger(object):
 
     def __init__(self, page):

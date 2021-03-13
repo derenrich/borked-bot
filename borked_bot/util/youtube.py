@@ -26,3 +26,20 @@ def batch_list_chan(yt, ids):
     for c in res['items']:
         out[c['id']] = c
     return out
+
+
+def batch_list_vids(yt, ids):
+    grouped_ids = ','.join(ids)
+    req = yt.videos().list(part="contentDetails,statistics,snippet,status",
+                             maxResults=YT_MAX_RESULTS,
+                             id=grouped_ids)
+    res = req.execute()
+    out = dict()
+
+    if 'items' not in res:
+        return out
+
+    for c in res['items']:
+        out[c['id']] = c
+    return out
+
