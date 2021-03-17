@@ -59,6 +59,15 @@ for item in tqdm(generator):
                 if quals:
                     count += 1
                     update_qualifiers(repo, fandom_claim, quals, "update metadata from fandom API")
+                else:
+                    # try again on wikia
+                    api_url = f"https://{fandom_subdomain}.wikia.com/api.php?"
+                    if lang:
+                        api_url = f"https://{fandom_subdomain}.wikia.com/{lang}/api.php?"
+                    quals = get_wikipage_quals(s, repo, api_url, fandom_article)
+                    if quals:
+                        count += 1
+                        update_qualifiers(repo, fandom_claim, quals, "update metadata from fandom API")
         except ValueError:
             traceback.print_exception(*sys.exc_info())
 

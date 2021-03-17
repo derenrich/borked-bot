@@ -191,6 +191,7 @@ def make_date(year, month, day):
 
 
 LANGS = {
+    'bg': 'Q7918',
     'de': 'Q188',
     'en': 'Q1860',
     'en-US': 'Q1860',
