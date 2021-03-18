@@ -10,3 +10,4 @@ tqdm
 lxml
 google-api-python-client
 python-dateutil
+isodate==0.6.0
