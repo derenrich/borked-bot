@@ -27,7 +27,8 @@ NUMBER_OF_FOLLOWERS = 'P3744' # statistics.subscriberCount
 VIEW_COUNT = 'P5436' # statistics.viewCount	
 YT_CHAN_ID = 'P2397'
 YT_VID_ID = 'P1651'
-NAMED_AS = 'P1810' # snippet.title	
+NAMED_AS = 'P1810' # snippet.title
+TITLE = 'P1476'
 START_TIME = 'P580' # snippet.publishedAt
 PUB_DATE = 'P577'
 POINT_IN_TIME = 'P585'
@@ -117,8 +118,14 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
                 iso_duration = data.get('contentDetails', {}).get('duration')
                 view_count = data.get('statistics',{}).get('viewCount')
                 title = data.get('snippet',{}).get('title')
+                if get_present_qualifier_values(yt_vid_claim, TITLE):
+                    # don't update if there's a title already
+                    title = None
                 start_time =  data.get('snippet', {}).get('publishedAt')
                 lang = parse_iso_lang(data.get('snippet', {}).get('defaultLanguage')) or parse_iso_lang(data.get('snippet', {}).get('defaultAudioLanguage'))
+                if get_present_qualifier_values(yt_vid_claim, LANG):
+                    # don't update if there's a lang already
+                    lang = None
                 quals = make_quals(repo, view_count, title, start_time, lang, iso_duration)
 
                 update_qualifiers(repo, yt_vid_claim, quals, "update youtube video data from api")
