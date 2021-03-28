@@ -7,6 +7,10 @@ WHERE
   # don't look at dead videos
   FILTER NOT EXISTS { ?f pq:P582 ?endTime. }
   FILTER NOT EXISTS { ?f pq:P1534 ?endCause. }
-  FILTER NOT EXISTS {?f pq:P5436 ?viewers. }
+  #FILTER NOT EXISTS {?f pq:P5436 ?viewers. }
+  FILTER NOT EXISTS {?f pq:P2047 ?duration. }
+
+  # don't look at senses
+  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
 
 }
