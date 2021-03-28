@@ -62,11 +62,11 @@ def make_quals(repo, view_count, title, start_time, lang_qid, iso_duration):
         td = parse_duration(iso_duration)
         seconds = td.total_seconds()
         SECONDS_ITEM =  pywikibot.ItemPage(repo, SECONDS)
-        seconds_quant = pywikibot.WbQuantity(seconds, site=repo, unit=SECONDS_ITEM, error=1)
+        seconds_quant = pywikibot.WbQuantity(seconds, site=repo, unit=SECONDS_ITEM)
         dur_claim = pywikibot.Claim(repo, DURATION, is_qualifier=True)
         dur_claim.setTarget(seconds_quant)
         quals.append(dur_claim)
-    quals.append(point_in_time_claim(repo))        
+    quals.append(point_in_time_claim(repo))
     return quals
 
 
