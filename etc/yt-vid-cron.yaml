@@ -9,7 +9,7 @@ metadata:
     name: borkedbot.bot-yt-vid
     toolforge: tool
 spec:
-  schedule: "@weekly"
+  schedule: "0 0 * * 3" # weekly on tues
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
