@@ -41,6 +41,12 @@ case "$1" in
         cd ${TOOL_DIR}
         exec python -m borked_bot.yt_chan_fill
         ;;
+    run-yt-vid)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot youtube video filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.yt_vid_fill
+        ;;
     run-twt)
         date +%Y-%m-%dT%H:%M:%S
         echo "Running borkedbot twitter filler..."

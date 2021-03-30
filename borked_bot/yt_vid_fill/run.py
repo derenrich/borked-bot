@@ -135,5 +135,3 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
         except ValueError:
             traceback.print_exception(*sys.exc_info())
 print(f"updated {count} entries")
-
-
