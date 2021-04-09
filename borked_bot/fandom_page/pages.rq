@@ -6,6 +6,7 @@ WHERE
   ?f wikibase:rank ?goodRanks.
   # don't look at dead pages or already tagged ones
   FILTER NOT EXISTS { ?f pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?f pq:P8554 ?endTime. }
   FILTER NOT EXISTS { ?f pq:P1534 ?endCause. }
   FILTER NOT EXISTS {?f pq:P407 ?fLang. }
 
