@@ -9,7 +9,7 @@ metadata:
     name: borkedbot.bot-fandom
     toolforge: tool
 spec:
-  schedule: "@weekly"
+  schedule: "0 0 * * 4"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
