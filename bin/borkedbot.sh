@@ -35,6 +35,12 @@ case "$1" in
         cd ${TOOL_DIR}
         exec python -m borked_bot.tw_follows  #--config ${CONFIG}
         ;;
+    run-fandom)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot fandom filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.fandom_page
+        ;;
     run-yt)
         date +%Y-%m-%dT%H:%M:%S
         echo "Running borkedbot youtube filler..."
