@@ -1,0 +1,33 @@
+---
+# Run borkedbot fandom job on kubernetes
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: borkedbot.bot-fandom
+  namespace: tool-borkedbot
+  labels:
+    name: borkedbot.bot-fandom
+    toolforge: tool
+spec:
+  schedule: "@weekly"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            name: borkedbot.bot-fandom
+            toolforge: tool
+        spec:
+          activeDeadlineSeconds: 604800
+          restartPolicy: OnFailure      
+          containers:
+            - name: bot
+              image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest
+              command: [ "/data/project/borkedbot/borked-bot/bin/borkedbot.sh", "run-fandom" ]
+              workingDir: /data/project/borkedbot
+              env:
+                - name: HOME
+                  value: /data/project/borkedbot
+              imagePullPolicy: Always
+
