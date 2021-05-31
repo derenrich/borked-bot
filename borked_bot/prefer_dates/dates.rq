@@ -1,0 +1,15 @@
+SELECT distinct ?item WHERE {
+  ?item p:P569 ?statement1, ?statement2 .
+  FILTER( ?statement1 != ?statement2 ) .
+  MINUS { ?item p:P569/wikibase:rank wikibase:PreferredRank } .
+  ?statement1 wikibase:rank wikibase:NormalRank .
+  ?statement2 wikibase:rank wikibase:NormalRank .
+  ?statement1 psv:P569 [ wikibase:timePrecision 11; wikibase:timeValue ?value1 ] .
+  ?statement2 psv:P569 [ wikibase:timePrecision ?prec; wikibase:timeValue ?value2 ] .
+  FILTER( ?prec IN ( 9, 10 ) ) .
+  FILTER( YEAR( ?value1 ) = YEAR( ?value2 ) ) .
+  FILTER( !( ?prec = 10 && MONTH( ?value1 ) != MONTH( ?value2 ) ) ) .
+  FILTER( EXISTS {
+    ?statement1 prov:wasDerivedFrom/!(pr:P143|pr:P4656|pr:P813) [] .
+  } ) .
+} LIMIT 2000
