@@ -1,4 +1,4 @@
-
+import logging
 
 
 def batcher(generator, batch_func, batch_size):
@@ -11,6 +11,13 @@ def batcher(generator, batch_func, batch_size):
                 yield (item, output)
             buf = []
     if buf:
-        output = batch_func(buf)
-        for item in buf:
-            yield (item, output)
+        output = None
+        try:
+            output = batch_func(buf)
+        except:
+            logging.exception("batch function failed!")
+
+        if output:
+            for item in buf:
+                yield (item, output)
+

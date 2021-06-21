@@ -86,6 +86,7 @@ def fetch_batch(items):
         handles += [tw.getTarget() for tw in tw_handles if tw.getTarget()]
     def get_batch_handles(handles):
         with twt_limiter:
+            handles = [h for h in handles if len(h) <= 15]
             res = batch_get_twitter(s, handles)
         return res
     res = {}
