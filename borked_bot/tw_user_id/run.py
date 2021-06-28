@@ -12,6 +12,8 @@ from tqdm import tqdm
 from dateutil.parser import isoparse
 from datetime import datetime
 import random
+import urllib3
+import requests
 
 # 300 requests per 15-minute window
 twt_limiter = RateLimiter(max_calls=300, period=15 * 60)
@@ -84,9 +86,10 @@ def fetch_batch(items):
             continue
         tw_handles = get_valid_claims(d, TWITTER_USERNAME)
         handles += [tw.getTarget() for tw in tw_handles if tw.getTarget()]
+    @retry(exceptions=[urllib3.exceptions.ProtocolError, requests.exceptions.RequestException])
     def get_batch_handles(handles):
         with twt_limiter:
-            handles = [h for h in handles if len(h) <= 15]
+            handles = [h for h in handles if len(h) <= 15 and ' ' not in h]
             res = batch_get_twitter(s, handles)
         return res
     res = {}
@@ -125,9 +128,10 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 update_qualifiers(repo, twt_handle_claim, quals, "update twitter data")
                 count += 1
             else:
-                quals = make_blank_quals(repo)
-                update_qualifiers(repo, twt_handle_claim, quals, "mark twitter data as bad")
-                count += 1
+                print("failed to fetch user ", twt_handle, fetch)
+                #quals = make_blank_quals(repo)
+                #update_qualifiers(repo, twt_handle_claim, quals, "mark twitter data as bad")
+                #count += 1
 
 
         except ValueError:
