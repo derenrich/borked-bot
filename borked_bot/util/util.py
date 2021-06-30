@@ -54,7 +54,7 @@ def get_matching_claim(item, prop_id, prop_value, qualifiers):
                 break
         if match:
             return c
-        
+
             
 def get_qualifiers(claim, qual_id):
     return [q for q in claim.qualifiers.get(qual_id, [])]
@@ -182,8 +182,8 @@ def point_in_time_claim(repo, time=None, prop=None):
     return retrieved
 
 
-def make_quantity(val, repo):
-    return pywikibot.WbQuantity(val, site=repo)
+def make_quantity(val, repo, error=None):
+    return pywikibot.WbQuantity(val, site=repo, error=error)
 
 def make_date(year, month, day):
     return pywikibot.WbTime(year=year, month=month, day=day)

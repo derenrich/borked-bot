@@ -1,0 +1,17 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P2397 ?yt.
+  ?yt wikibase:rank ?goodRanks.
+  # don't look at dead accounts
+  FILTER NOT EXISTS { ?yt pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?yt pq:P8554 ?endTime2. }  
+  FILTER NOT EXISTS { ?yt pq:P1534 ?endCause. }
+
+  FILTER NOT EXISTS {
+    ?item p:P8687 ?followers.
+    ?followers pq:P2397 ?ytSubs.
+  }
+
+}
