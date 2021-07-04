@@ -14,4 +14,5 @@ WHERE
     ?followers pq:P2397 ?ytSubs.
   }
 
-}
+  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
+} #limit 30000 offset 30000
