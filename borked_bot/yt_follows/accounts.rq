@@ -15,4 +15,6 @@ WHERE
   }
 
   FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
-} #limit 30000 offset 30000
+  FILTER (!(contains(str(?item), "L" ))).
+}
+
