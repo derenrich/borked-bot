@@ -17,6 +17,6 @@ WHERE
   ?twt pq:P6552 ?twId.
   FILTER (!isBlank(?twId)).
 
+  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
   FILTER (!(contains(str(?item), "L" ))).
 }
-
