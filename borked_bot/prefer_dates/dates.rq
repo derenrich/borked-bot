@@ -12,4 +12,4 @@ SELECT distinct ?item WHERE {
   FILTER( EXISTS {
     ?statement1 prov:wasDerivedFrom/!(pr:P143|pr:P4656|pr:P813) [] .
   } ) .
-} LIMIT 2000
+} LIMIT 10

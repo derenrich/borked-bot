@@ -13,7 +13,7 @@ import random
 import json
 from requests.exceptions import ReadTimeout
 
-BANNED_REFS = set(['P143','P4656','P813'])
+BANNED_REFS = set(['P143','P4656','P813', 'P7569','P9675','P1476','P50'])
 DATE_PROP = 'P569'
 REASON_FOR_UPRANK = 'P7452'
 MOST_PRECISE_VALUE = 'Q71536040'
@@ -36,8 +36,10 @@ def make_qualifier():
     return stated_in_claim
 
 def get_most_specific(date_claims):
-    date_claims_sorted = sorted(date_claims, key=lambda d: d.getTarget().precision)
+    # sort such that more precise and well cited claims appear later
+    date_claims_sorted = sorted(date_claims, key=lambda d: (d.getTarget().precision, is_well_cited(d)))
     most_specific = date_claims_sorted[-1]
+    # check that the less specific dates are consistent
     for date in [dc.getTarget() for dc in date_claims_sorted[0:-1]]:
         if date.calendarmodel != most_specific.getTarget().calendarmodel:
             return None
@@ -89,8 +91,7 @@ for item in tqdm(generator):
         count += 1
         best_date_claim.changeRank('preferred')
         best_date_claim.addQualifier(make_qualifier())
-    if count >= 5:
-        break
+
 
 print(f"updated {count} entries")
 
