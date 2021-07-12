@@ -13,7 +13,7 @@ import random
 import json
 from requests.exceptions import ReadTimeout
 
-BANNED_REFS = set(['P143','P4656','P813', 'P7569','P9675','P1476','P50'])
+BANNED_REFS = set(['P143','P4656','P813', 'P7569','P9675','P1476','P50', 'P1810'])
 DATE_PROP = ['P569', 'P570']
 REASON_FOR_UPRANK = 'P7452'
 MOST_PRECISE_VALUE = 'Q71536040'
