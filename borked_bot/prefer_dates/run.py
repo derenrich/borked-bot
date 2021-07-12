@@ -14,7 +14,7 @@ import json
 from requests.exceptions import ReadTimeout
 
 BANNED_REFS = set(['P143','P4656','P813', 'P7569','P9675','P1476','P50'])
-DATE_PROP = 'P569'
+DATE_PROP = ['P569', 'P570']
 REASON_FOR_UPRANK = 'P7452'
 MOST_PRECISE_VALUE = 'Q71536040'
 
@@ -71,26 +71,27 @@ def is_well_cited(date_claim):
 count = 0
 for item in tqdm(generator):
     d = get_item(item)
-   
+
     if not d:
         continue
+    
+    for dp in DATE_PROP:
+        unqualified_date_claims = [c for c in get_valid_claims(d, dp) if not c.qualifiers and c.getTarget()]
+        if len(unqualified_date_claims) < 2:
+            # nothing to change
+            continue
+        if any([c.getTarget().before for c in unqualified_date_claims] + [c.getTarget().after for c in unqualified_date_claims]):
+            # don't deal with dates with uncertainty for now
+            continue
+        if any([c.getRank() == 'preferred' for c in unqualified_date_claims]):
+            # don't touch already preferred claims
+            continue
 
-    unqualified_date_claims = [c for c in get_valid_claims(d, DATE_PROP) if not c.qualifiers and c.getTarget()]
-    if len(unqualified_date_claims) < 2:
-        # nothing to change
-        continue
-    if any([c.getTarget().before for c in unqualified_date_claims] + [c.getTarget().after for c in unqualified_date_claims]):
-        # don't deal with dates with uncertainty for now
-        continue
-    if any([c.getRank() == 'preferred' for c in unqualified_date_claims]):
-        # don't touch already preferred claims
-        continue
-
-    best_date_claim = get_most_specific(unqualified_date_claims)
-    if best_date_claim and is_well_cited(best_date_claim):
-        count += 1
-        best_date_claim.changeRank('preferred')
-        best_date_claim.addQualifier(make_qualifier())
+        best_date_claim = get_most_specific(unqualified_date_claims)
+        if best_date_claim and is_well_cited(best_date_claim):
+            count += 1
+            best_date_claim.changeRank('preferred')
+            best_date_claim.addQualifier(make_qualifier())
 
 
 print(f"updated {count} entries")
