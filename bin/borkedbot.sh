@@ -71,6 +71,13 @@ case "$1" in
         cd ${TOOL_DIR}
         exec python -m borked_bot.tw_follows
         ;;
+    run-prefer-dates)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot prefer dates..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.prefer_dates
+        ;;
+
     stop)
         echo "Stopping borkedbot k8s job..."
         $KUBECTL delete job ${DEPLOYMENT}
