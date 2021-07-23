@@ -22,8 +22,6 @@ yt_limiter = RateLimiter(max_calls=11, period=100)
 yt = make_yt_client()
 session = get_session()
 
-NUMBER_OF_WORKS = 'P3740' # statistics.videoCount	
-NUMBER_OF_FOLLOWERS = 'P3744' # statistics.subscriberCount	
 VIEW_COUNT = 'P5436' # statistics.viewCount	
 YT_CHAN_ID = 'P2397'
 YT_VID_ID = 'P1651'
@@ -38,7 +36,7 @@ MIN_DATA_AGE_DAYS = 60
 MAX_YT_PER_REQ = 50
 LANG = 'P407'
 
-def make_quals(repo, view_count, title, start_time, lang_qid, iso_duration):
+def make_quals(repo, view_count, title, start_time, lang_qid, iso_duration, channel):
     quals = []
     if title:
         named_as_claim = pywikibot.Claim(repo, NAMED_AS, is_qualifier=True)
@@ -66,6 +64,10 @@ def make_quals(repo, view_count, title, start_time, lang_qid, iso_duration):
         dur_claim = pywikibot.Claim(repo, DURATION, is_qualifier=True)
         dur_claim.setTarget(seconds_quant)
         quals.append(dur_claim)
+    if channel:
+        chan_claim = pywikibot.Claim(repo, YT_CHAN_ID, is_qualifier=True)
+        chan_claim.setTarget(channel)
+        quals.append(chan_claim)
     quals.append(point_in_time_claim(repo))
     return quals
 
@@ -118,6 +120,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
                 iso_duration = data.get('contentDetails', {}).get('duration')
                 view_count = data.get('statistics',{}).get('viewCount')
                 title = data.get('snippet',{}).get('title')
+                channel = data.get('snippet',{}).get('channelId')
                 if get_present_qualifier_values(yt_vid_claim, TITLE):
                     # don't update if there's a title already
                     title = None
@@ -126,7 +129,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
                 if get_present_qualifier_values(yt_vid_claim, LANG):
                     # don't update if there's a lang already
                     lang = None
-                quals = make_quals(repo, view_count, title, start_time, lang, iso_duration)
+                quals = make_quals(repo, view_count, title, start_time, lang, iso_duration, channel)
 
                 update_qualifiers(repo, yt_vid_claim, quals, "update youtube video data from api")
                 count += 1
