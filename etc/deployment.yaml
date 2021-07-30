@@ -9,7 +9,7 @@ metadata:
     name: borkedbot.bot
     toolforge: tool
 spec:
-  ttlSecondsAfterFinished: 10800
+  ttlSecondsAfterFinished: 1300800
   template:
     metadata:
       labels:

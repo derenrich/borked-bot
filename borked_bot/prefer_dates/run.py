@@ -71,7 +71,11 @@ def is_well_cited(date_claim):
 for offset in range(0, 10000000, 150):
     print(f"query for offset={offset}")
     QUERY = Template(QUERY_TEMPLATE).substitute(offset=offset)
-    generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
+    try:
+        generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
+    except:
+        print("failed to run SPARQL query")
+        continue
     count = 0
     for item in tqdm(generator):
         d = get_item(item)
