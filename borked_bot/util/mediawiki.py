@@ -8,6 +8,7 @@ import pywikibot
 NAMED_AS = "P1810"
 LANG = 'P407'
 LAST_UPDATE = 'P5017'
+CURID = 'P9675'
 
 @retry(exceptions=[ReadTimeout])
 def get_wikipage_quals(session, repo, API_ENDPOINT, title):
@@ -25,6 +26,7 @@ def get_wikipage_quals(session, repo, API_ENDPOINT, title):
         title = p.get('title')
         lang_code = p.get('pagelanguage')
         touched = p.get('touched')
+        curid = p.get('pageid')
 
         quals = []
 
@@ -39,5 +41,9 @@ def get_wikipage_quals(session, repo, API_ENDPOINT, title):
                 LANG_ITEM = pywikibot.ItemPage(repo, lang_qid)
                 lang_claim.setTarget(LANG_ITEM)
                 quals.append(lang_claim)           
+        if curid:
+            curid_claim = pywikibot.Claim(repo, CURID, is_qualifier=True)
+            curid_claim.setTarget(str(curid))
+            quals.append(curid_claim)
 
         return quals
