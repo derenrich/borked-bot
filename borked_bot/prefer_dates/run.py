@@ -13,11 +13,14 @@ import random
 import json
 from requests.exceptions import ReadTimeout
 from string import Template
+import time
 
 BANNED_REFS = set(['P143','P4656','P813', 'P7569','P9675','P1476','P50', 'P1810'])
 DATE_PROP = ['P569', 'P570']
 REASON_FOR_UPRANK = 'P7452'
 MOST_PRECISE_VALUE = 'Q71536040'
+
+limit = 100
 
 s = get_session()
 
@@ -68,13 +71,15 @@ def is_well_cited(date_claim):
     
 
 
-for offset in range(0, 10000000, 150):
+for offset in range(0, 10000000, limit):
     print(f"query for offset={offset}")
-    QUERY = Template(QUERY_TEMPLATE).substitute(offset=offset)
+    QUERY = Template(QUERY_TEMPLATE).substitute(offset=offset, limit=limit)
+    time.sleep(20)
     try:
         generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
-    except:
-        print("failed to run SPARQL query")
+    except Exception as e:
+        print("failed to run SPARQL query", e)
+        traceback.print_exc()
         continue
     count = 0
     for item in tqdm(generator):
