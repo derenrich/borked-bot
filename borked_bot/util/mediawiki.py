@@ -4,6 +4,7 @@ from .util import *
 from requests.exceptions import ReadTimeout
 from dateutil.parser import isoparse
 import pywikibot
+import urllib3
 
 NAMED_AS = "P1810"
 LANG = 'P407'
@@ -13,7 +14,10 @@ CURID = 'P9675'
 @retry(exceptions=[ReadTimeout])
 def get_wikipage_quals(session, repo, API_ENDPOINT, title):
     payload = {'action':'query', 'titles': title, 'prop': 'info', 'format': 'json'}
-    response = session.get(API_ENDPOINT, params=payload)
+    try:
+      response = session.get(API_ENDPOINT, params=payload)
+    except urllib3.exceptions.MaxRetryError:
+      response = None
     if not response:
         return
     response_json = response.json()
