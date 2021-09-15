@@ -1,7 +1,7 @@
 
 import requests
 from .util import *
-from requests.exceptions import ReadTimeout
+from requests.exceptions import ReadTimeout, ConnectionError
 from dateutil.parser import isoparse
 import pywikibot
 import urllib3
@@ -16,7 +16,7 @@ def get_wikipage_quals(session, repo, API_ENDPOINT, title):
     payload = {'action':'query', 'titles': title, 'prop': 'info', 'format': 'json'}
     try:
       response = session.get(API_ENDPOINT, params=payload)
-    except urllib3.exceptions.MaxRetryError:
+    except (urllib3.exceptions.MaxRetryError, ConnectionError) as e:
       response = None
     if not response:
         return
