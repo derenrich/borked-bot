@@ -28,6 +28,7 @@ repo = wikidata_site.data_repository()
 
 generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
 
+MW_PAGE_ID = 'P9675'
 
 count = 0
 for item in tqdm(generator):
@@ -43,6 +44,9 @@ for item in tqdm(generator):
         try:
             fandom_string = fandom_claim.getTarget()
             if fandom_string:
+                if get_qualifiers(fandom_claim, MW_PAGE_ID):
+                    # we almost certainly already visited this item
+                    continue
                 fandom_prefix, fandom_article = fandom_string.split(':', 1)
                 if '.' in fandom_prefix:
                     lang, fandom_subdomain = fandom_prefix.split('.')
