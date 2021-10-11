@@ -5,6 +5,7 @@ import logging
 import time
 import sys
 from datetime import timezone
+from collections import defaultdict
 
 MAX_LAG_BACKOFF_SECS = 10 * 60
 
@@ -233,3 +234,52 @@ class WikiLogger(object):
         self._page.text = self._text
         self._page.save('appending log line')
 
+
+POINT_IN_TIME = 'P585'
+
+def claim_age(item, prop_id, qual_id, qual_value):
+    today = datetime.date.today()
+    claims = get_valid_claims(item, prop_id)
+    valid_claims = [c for c in claims if qual_value in get_valid_qualifier_values(c, qual_id)]
+    if valid_claims:
+        max_date = max(map(get_point_in_time, valid_claims))
+        return today - max_date
+    else:        
+        return datetime.timedelta(days=3652058)
+
+def wb_time_to_date(wb_time):
+    return datetime.date(wb_time.year, wb_time.month, wb_time.day)
+
+def get_point_in_time(claim):
+    times = get_valid_qualifier_values(claim, POINT_IN_TIME)
+    if len(times) >= 2 or not times:
+        return datetime.date.min
+    return wb_time_to_date(times[0])
+    
+def update_most_recent_rank(item, prop_id, qual_id):
+    """
+    For a property find all statements with a given qualifier value.
+    Take the newest statement and make it preferred
+    Make all the rest normal rank.
+    """
+    claims = get_valid_claims(item, prop_id)
+    grouped_claims = defaultdict(list)
+    for c in claims:
+        qual_value = get_valid_qualifier_values(c, qual_id)
+        if len(qual_value) >= 2:
+            # no idea what we should do. just bail out.
+            return
+        if qual_value:
+            grouped_claims[qual_value[0]].append(c)
+
+    for qual_value, claims in grouped_claims.items():
+        claims.sort(key=lambda c: get_point_in_time(c))
+        *olders, most_recent = claims
+        if not olders:
+            # if there's only one don't change rank
+            return
+        for c in olders:
+            if c.getRank() == 'preferred':
+                c.changeRank('normal')
+        if most_recent.getRank() != 'preferred':
+            most_recent.changeRank('preferred')

@@ -1,6 +1,6 @@
 import pywikibot
 import traceback
-import sys
+import sys, os
 from pywikibot import pagegenerators as pg
 import pathlib
 from ratelimiter import RateLimiter
@@ -22,6 +22,8 @@ USERS_PER_REQ = 75
 
 s = get_session()
 
+MIN_FOLLOWS = 5000
+MIN_DATA_AGE_DAYS = 180
 MAX_YT_PER_REQ = 50
 YT_CHAN_ID = 'P2397'
 FOLLOWERS = 'P8687'
@@ -43,9 +45,12 @@ def make_quals(repo, yt_id):
     quals.append(point_in_time_claim(repo))
     return quals
 
-WD = str(pathlib.Path(__file__).parent.absolute())
+SPARQL_FILE = 'accounts.rq'
+if 'ALL_ITEMS' in os.environ:
+    SPARQL_FILE = 'accounts_all.rq'
 
-with open(WD + '/accounts.rq', 'r') as query_file:
+WD = str(pathlib.Path(__file__).parent.absolute())
+with open(WD + '/' + SPARQL_FILE, 'r') as query_file:
     QUERY = query_file.read()
 
 wikidata_site = pywikibot.Site("wikidata", "wikidata")
@@ -60,7 +65,11 @@ def fetch_batch(items):
         if not d:
             continue
         yt_chans = get_valid_claims(d, YT_CHAN_ID)
-        yt_ids += [chan.getTarget() for chan in yt_chans if chan.getTarget()]        
+        new_yt_ids = [chan.getTarget() for chan in yt_chans if chan.getTarget()]
+        for yt_id in new_yt_ids:
+            age = claim_age(d, FOLLOWERS, YT_CHAN_ID, yt_id)
+            if age.days >= MIN_DATA_AGE_DAYS:
+                yt_ids.append(yt_id)
     def get_batch_yt(yt_ids):
         with yt_limiter:
             res = batch_list_chan(yt, yt_ids)
@@ -87,13 +96,14 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
         if yt_id in fetch:
             data = fetch[yt_id]
             sub_count = data.get('statistics', {}).get('subscriberCount')
-            if sub_count is None or int(sub_count) < 10000:
+            if sub_count is None or int(sub_count) < MIN_FOLLOWS:
                 continue
             uncertainty = get_uncertainty(int(sub_count))
             follower_quant = make_quantity(int(sub_count), repo, error=(uncertainty - 1, 0))
             quals = make_quals(repo, yt_id)
             add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add subscriber count")
             count += 1
+            update_most_recent_rank(d, FOLLOWERS, YT_CHAN_ID)
     except ValueError:
         traceback.print_exception(*sys.exc_info())
 
