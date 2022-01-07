@@ -12,4 +12,3 @@ WHERE
   FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
   FILTER (!(contains(str(?item), "L" ))).
 }
-limit 200
