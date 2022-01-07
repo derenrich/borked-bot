@@ -1,0 +1,15 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P2002 ?twt.
+  ?twt wikibase:rank ?goodRanks.
+  # don't look at dead accounts
+  FILTER NOT EXISTS { ?twt pq:P582 ?endTime. }
+
+  ?twt pq:P6552 ?twId.
+
+  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
+  FILTER (!(contains(str(?item), "L" ))).
+}
+limit 200

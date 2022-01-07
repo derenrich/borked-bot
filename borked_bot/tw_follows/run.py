@@ -1,6 +1,6 @@
 import pywikibot
 import traceback
-import sys
+import sys, os
 from pywikibot import pagegenerators as pg
 import pathlib
 from ratelimiter import RateLimiter
@@ -22,19 +22,9 @@ USERS_PER_REQ = 75
 
 s = get_session()
 
-NUMBER_OF_WORKS = 'P3740' # statistics.videoCount	
-NUMBER_OF_FOLLOWERS = 'P3744' # statistics.subscriberCount	
-VIEW_COUNT = 'P5436' # statistics.viewCount	
 TWITTER_USERNAME = 'P2002'
-HAS_QUAL = 'P1552'
-VERIFIED = 'Q28378282'
 TWITTER_ID = 'P6552'
-NAMED_AS = 'P1810' # snippet.title	
-START_TIME = 'P580' # snippet.publishedAt
-END_TIME = 'P582'
-POINT_IN_TIME = 'P585'
-MIN_DATA_AGE_DAYS = 14
-MAX_YT_PER_REQ = 50
+MIN_DATA_AGE_DAYS = 180
 FOLLOWERS = 'P8687'
 
 def make_quals(repo, twt_id):
@@ -48,7 +38,11 @@ def make_quals(repo, twt_id):
 
 WD = str(pathlib.Path(__file__).parent.absolute())
 
-with open(WD + '/accounts.rq', 'r') as query_file:
+SPARQL_FILE = "/accounts.rq"
+if 'ALL_ITEMS' in os.environ:
+    SPARQL_FILE = '/accounts_all.rq'
+
+with open(WD + SPARQL_FILE, 'r') as query_file:
     QUERY = query_file.read()
 
 wikidata_site = pywikibot.Site("wikidata", "wikidata")
@@ -63,7 +57,11 @@ def fetch_batch(items):
         if not d:
             continue
         tw_handles = get_valid_claims(d, TWITTER_USERNAME)
-        tw_ids += map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
+        item_tw_ids = map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
+        for tw_id in item_tw_ids:
+            age = claim_age(d, FOLLOWERS, TWITTER_ID, tw_id)
+            if age.days >= MIN_DATA_AGE_DAYS:
+                tw_ids.append(tw_id)
     def get_batch_handles(handles):
         with twt_limiter:
             res = batch_get_twitter(s, handles, mode='ids', extra_fields=['public_metrics'])
@@ -73,6 +71,7 @@ def fetch_batch(items):
     for _, fetch in results:
         res.update(dict(fetch))
     return res
+
 
 count = 0
 for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
@@ -96,6 +95,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                     quals = make_quals(repo, twt_id)
                     add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add follower count")
                     count += 1
+                    update_most_recent_rank(d, FOLLOWERS, TWITTER_ID)
         except ValueError:
             traceback.print_exception(*sys.exc_info())
 

@@ -35,7 +35,6 @@ def retry(count=3, wait=1, exceptions=[pywikibot.data.api.APIError]):
         return wrapped_f
     return retrier
 
-
 def get_valid_claims(item, prop_id):
     claims = item['claims'].get(prop_id, [])
     return [c for c in claims if c.getRank() != "deprecated"]
