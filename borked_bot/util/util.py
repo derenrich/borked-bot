@@ -105,9 +105,9 @@ def get_session():
     s.headers.update({'User-Agent': 'BorkedBot[Wikidata]'})
     return s
 
-def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment=""):
+def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="", rank='normal'):
     try:
-        c = pywikibot.Claim(repo, prop)
+        c = pywikibot.Claim(repo, prop, rank=rank)
         c.setTarget(target)
         if qualifiers:
             for qual in qualifiers:

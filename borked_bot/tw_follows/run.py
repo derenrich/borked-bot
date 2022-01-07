@@ -93,7 +93,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 if followers and followers >= 10000:
                     follower_quant = make_quantity(followers, repo)
                     quals = make_quals(repo, twt_id)
-                    add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add follower count")
+                    add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add follower count", rank='preferred')
                     count += 1
                     update_most_recent_rank(d, FOLLOWERS, TWITTER_ID)
         except ValueError:
