@@ -68,13 +68,13 @@ def is_well_cited(date_claim):
                 return True
     return False
 
-    
 
-
-for offset in range(0, 10000000, limit):
+MAX_OFFSET = 10_000_000 # there are roughly 10MM humans in wikidata
+start_idx = random.randint(0, MAX_OFFSET)
+for offset in range(start_idx, MAX_OFFSET, limit):
     print(f"query for offset={offset}")
     QUERY = Template(QUERY_TEMPLATE).substitute(offset=offset, limit=limit)
-    time.sleep(20)
+    time.sleep(10)
     try:
         generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
     except Exception as e:
@@ -84,7 +84,6 @@ for offset in range(0, 10000000, limit):
     count = 0
     for item in tqdm(generator):
         d = get_item(item)
-
         if not d:
             continue
 
@@ -101,11 +100,16 @@ for offset in range(0, 10000000, limit):
                 continue
 
             best_date_claim = get_most_specific(unqualified_date_claims)
+            if best_date_claim:
+                month = best_date_claim.getTarget().month
+                day = best_date_claim.getTarget().day
+                if month == 1 and day == 1:
+                    # skip jan1 dates because they are error prone
+                    continue
             if best_date_claim and is_well_cited(best_date_claim):
                 count += 1
                 best_date_claim.changeRank('preferred')
                 best_date_claim.addQualifier(make_qualifier())
-
 
     print(f"updated {count} entries")
 
