@@ -11,6 +11,8 @@ metadata:
 spec:
   schedule: "@weekly"
   concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:

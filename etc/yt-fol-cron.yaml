@@ -11,6 +11,8 @@ metadata:
 spec:
   schedule: "0 1 * * 3" # weekly on wed
   concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
   jobTemplate:
     spec:
       template:
