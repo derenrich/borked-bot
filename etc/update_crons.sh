@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-for YAML_CONF in *.yaml; do
+for YAML_CONF in *_cron.yaml; do
     kubectl apply -f $YAML_CONF
 done
 
