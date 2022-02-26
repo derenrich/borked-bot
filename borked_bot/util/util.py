@@ -17,7 +17,7 @@ def get_item(item):
     except pywikibot.exceptions.UnknownSite:
         return None
 
-def retry(count=3, wait=1, exceptions=[pywikibot.data.api.APIError]):
+def retry(count=3, wait=1, exceptions=[pywikibot.exceptions.APIError]):
     def retrier(f):
         def wrapped_f(*args, retry_count = 0, **kwargs):
             try:
@@ -116,7 +116,7 @@ def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="
         if sources:
             c.addSources(sources, summary="adding sources", bot=True)
         return c
-    except (pywikibot.exceptions.OtherPageSaveError, pywikibot.data.api.APIMWException) as ex:
+    except (pywikibot.exceptions.OtherPageSaveError, pywikibot.exceptions.APIError) as ex:
         logging.error("failed to add claim for prop %s", prop, exc_info=ex)
         time.sleep(30)
     except pywikibot.exceptions.MaxlagTimeoutError as ex:
@@ -247,7 +247,13 @@ def claim_age(item, prop_id, qual_id, qual_value):
         return datetime.timedelta(days=3652058)
 
 def wb_time_to_date(wb_time):
-    return datetime.date(wb_time.year, wb_time.month, wb_time.day)
+    day = wb_time.day
+    if day == 0:
+        day = 1
+    month = wb_time.month
+    if month == 0:
+        month = 1
+    return datetime.date(wb_time.year, month, day)
 
 def get_point_in_time(claim):
     times = get_valid_qualifier_values(claim, POINT_IN_TIME)
