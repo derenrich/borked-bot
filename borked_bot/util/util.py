@@ -14,6 +14,8 @@ def get_item(item):
         return item.get()
     except pywikibot.exceptions.NoPage:
         return None
+    except pywikibot.exceptions.IsRedirectPageError:
+        return None
     except pywikibot.exceptions.UnknownSite:
         return None
 
