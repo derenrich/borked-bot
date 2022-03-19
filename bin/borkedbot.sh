@@ -45,7 +45,7 @@ case "$1" in
         date +%Y-%m-%dT%H:%M:%S
         echo "Running borkedbot youtube filler..."
         cd ${TOOL_DIR}
-        exec python -m borked_bot.yt_chan_fill
+        exec python -m borked_bot.yt_chan_fill --all_items --enwiki
         ;;
     run-yt-vid)
         date +%Y-%m-%dT%H:%M:%S
