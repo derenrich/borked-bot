@@ -1,6 +1,7 @@
 from ..credentials import CREDENTIALS
 from .util import *
 from googleapiclient.discovery import build
+import socket
 
 YT_MAX_RESULTS = 50
 
@@ -12,7 +13,7 @@ def make_yt_client():
     youtube = build(api_service_name, api_version, developerKey=api_key)
     return youtube
 
-@retry(exceptions=[ConnectionError])
+@retry(exceptions=[ConnectionError, socket.timeout])
 def batch_list_chan(yt, ids):
     grouped_ids = ','.join(ids)
     req = yt.channels().list(part="contentDetails,statistics,snippet,status,brandingSettings",
@@ -28,7 +29,7 @@ def batch_list_chan(yt, ids):
         out[c['id']] = c
     return out
 
-@retry(exceptions=[ConnectionError])
+@retry(exceptions=[ConnectionError, socket.timeout])
 def batch_list_vids(yt, ids):
     grouped_ids = ','.join(ids)
     req = yt.videos().list(part="contentDetails,statistics,snippet,status",

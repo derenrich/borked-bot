@@ -88,7 +88,7 @@ def get_best_claim(item, prop_id, consider=lambda c: True):
     for c in claims:
         # not deprecated and no end time
         claim_rank = c.getRank()
-        if claim_rank != "deprecated" and not get_valid_qualifier(c, 'P582') and consider(c):
+        if claim_rank != "deprecated" and not claim_is_ended(c) and consider(c):
             if claim_rank == rank:
                 matched_rank = True
             elif claim_rank == 'preferred':
@@ -101,6 +101,13 @@ def get_best_claim(item, prop_id, consider=lambda c: True):
     if best and not matched_rank:
         return best
     return None
+
+END_QUALS = ['P582', 'P8554', 'P1534']
+def claim_is_ended(claim):
+    for end_qual in END_QUALS:
+        if get_valid_qualifier(claim, end_qual):
+            return True
+    return False
 
 def get_session():
     s = requests.Session()
@@ -184,6 +191,20 @@ def point_in_time_claim(repo, time=None, prop=None):
     return retrieved
 
 
+def get_target_float_quantity(claim):
+    """
+    Try to get a float out of the value of a claim
+    """
+    if claim is None:
+        return None
+    target = claim.getTarget()
+    if target is None:
+        return None
+    amount = target.amount
+    if amount is None:
+        return None
+    return float(amount)
+
 def make_quantity(val, repo, error=None):
     return pywikibot.WbQuantity(val, site=repo, error=error)
 
@@ -222,7 +243,6 @@ def parse_iso_lang(lang):
     return LANGS.get(lang)
 
 
-
 class WikiLogger(object):
 
     def __init__(self, page):
@@ -239,6 +259,9 @@ class WikiLogger(object):
 POINT_IN_TIME = 'P585'
 
 def claim_age(item, prop_id, qual_id, qual_value):
+    """
+    how old is the newest point in time for this property/qualifier/value triple
+    """
     today = datetime.date.today()
     claims = get_valid_claims(item, prop_id)
     valid_claims = [c for c in claims if qual_value in get_valid_qualifier_values(c, qual_id)]
@@ -247,6 +270,22 @@ def claim_age(item, prop_id, qual_id, qual_value):
         return today - max_date
     else:        
         return datetime.timedelta(days=3652058)
+
+def latest_claim(item, prop_id, qual_id, qual_value):
+    """
+    what is the most recent value for this property/qualifier/value triple
+    """
+
+    claims = get_valid_claims(item, prop_id)
+    valid_claims = [c for c in claims if qual_value in get_valid_qualifier_values(c, qual_id)]
+    latest_claim = None
+    latest_claim_time = datetime.date.min
+    for claim in valid_claims:
+        claim_date = get_point_in_time(claim)
+        if claim_date > latest_claim_time:
+            latest_claim = claim
+            latest_claim_time = claim_date
+    return latest_claim
 
 def wb_time_to_date(wb_time):
     day = wb_time.day

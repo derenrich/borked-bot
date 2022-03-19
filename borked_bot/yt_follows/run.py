@@ -1,6 +1,6 @@
 import pywikibot
 import traceback
-import sys, os
+import sys, os, math
 from pywikibot import pagegenerators as pg
 import pathlib
 from ratelimiter import RateLimiter
@@ -23,7 +23,7 @@ USERS_PER_REQ = 75
 s = get_session()
 
 MIN_FOLLOWS = 5000
-MIN_DATA_AGE_DAYS = 180
+MIN_DATA_AGE_DAYS = 365
 MAX_YT_PER_REQ = 50
 YT_CHAN_ID = 'P2397'
 FOLLOWERS = 'P8687'
@@ -45,9 +45,26 @@ def make_quals(repo, yt_id):
     quals.append(point_in_time_claim(repo))
     return quals
 
+def should_update(old_sub_count, new_sub_count):
+    if 'ENWIKI' in os.environ:
+        if old_sub_count is None:
+            return True
+        if old_sub_count * 1.1 < new_sub_count :
+            # did the yt chan grow by 10%?
+            return True
+        if int(math.log10(old_sub_count)) < int(math.log10(new_sub_count)):
+            # did the yt chan cross a power of 10 threshold?
+            return True
+        return False
+    else:
+        return True
+
 SPARQL_FILE = 'accounts.rq'
 if 'ALL_ITEMS' in os.environ:
     SPARQL_FILE = 'accounts_all.rq'
+if 'ENWIKI' in os.environ:
+    SPARQL_FILE = 'accounts_all_enwiki.rq'
+    MIN_DATA_AGE_DAYS = 7
 
 WD = str(pathlib.Path(__file__).parent.absolute())
 with open(WD + '/' + SPARQL_FILE, 'r') as query_file:
@@ -98,10 +115,16 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
             sub_count = data.get('statistics', {}).get('subscriberCount')
             if sub_count is None or int(sub_count) < MIN_FOLLOWS:
                 continue
-            uncertainty = get_uncertainty(int(sub_count))
-            follower_quant = make_quantity(int(sub_count), repo, error=(uncertainty - 1, 0))
+            sub_count = int(sub_count)
+
+            old_sub_count = get_target_float_quantity(latest_claim(d, FOLLOWERS, YT_CHAN_ID, yt_id))
+            if  old_sub_count is not None and not should_update(old_sub_count, sub_count):
+                continue
+
+            uncertainty = get_uncertainty(sub_count)
+            follower_quant = make_quantity(sub_count, repo, error=(uncertainty - 1, 0))
             quals = make_quals(repo, yt_id)
-            add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add subscriber count")
+            add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add subscriber count", rank='preferred')
             count += 1
             update_most_recent_rank(d, FOLLOWERS, YT_CHAN_ID)
     except ValueError:
