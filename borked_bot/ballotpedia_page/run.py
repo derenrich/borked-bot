@@ -14,7 +14,7 @@ import random
 BALLOTPEDIA_PAGE = 'P2390'
 
 # 1 requests per second
-ballotpedia_limiter = RateLimiter(max_calls=600, period=60)
+ballotpedia_limiter = RateLimiter(max_calls=60, period=60)
 
 s = get_session()
 
@@ -50,11 +50,13 @@ for item in tqdm(generator):
                 api_url = "https://ballotpedia.org/wiki/api.php"
 
                 quals = get_wikipage_quals(s, repo, api_url, bp_string)
-                # don't want language for this
-                quals = [q for q in quals if q.id != 'P407']
                 if quals:
                     count += 1
+                    # don't want language for this
+                    quals = [q for q in quals if q.id != 'P407']
                     update_qualifiers(repo, bp_claim, quals, "update metadata from ballotpedia wiki API")
+                else:
+                    print(f"failed to fetch for {bp_string}")
         except ValueError:
             traceback.print_exception(*sys.exc_info())
 
