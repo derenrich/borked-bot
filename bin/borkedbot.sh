@@ -77,6 +77,12 @@ case "$1" in
         cd ${TOOL_DIR}
         exec python -m borked_bot.prefer_dates
         ;;
+    run-ballotpedia)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot ballotpedia..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.ballotpedia_page
+        ;;
 
     stop)
         echo "Stopping borkedbot k8s job..."
