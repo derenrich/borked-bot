@@ -103,16 +103,24 @@ def get_best_claim(item, prop_id, consider=lambda c: True):
     return None
 
 END_QUALS = ['P582', 'P8554', 'P1534']
-def claim_is_ended(claim):
+def claim_is_ended(claim) -> bool:
     for end_qual in END_QUALS:
         if get_valid_qualifier(claim, end_qual):
             return True
     return False
 
-def get_session():
+def get_session() -> requests.Session:
     s = requests.Session()
     s.headers.update({'User-Agent': 'BorkedBot[Wikidata]'})
     return s
+
+
+
+def get_logger(name) -> logging.Logger:
+    logging.basicConfig(level = logging.WARN, force=True)
+    logger = logging.getLogger(name)
+    logger.setLevel("INFO")
+    return logger
 
 def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="", rank='normal'):
     try:
