@@ -117,7 +117,7 @@ def get_session() -> requests.Session:
 
 
 def get_logger(name) -> logging.Logger:
-    logging.basicConfig(level = logging.WARN, force=True)
+    logging.basicConfig(level = logging.WARN)
     logger = logging.getLogger(name)
     logger.setLevel("INFO")
     return logger
