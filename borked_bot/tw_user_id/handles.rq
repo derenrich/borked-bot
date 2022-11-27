@@ -1,19 +1,28 @@
 SELECT distinct ?item
 WHERE
 {
-  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  #VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
   ?item p:P2002 ?twt.
-  ?twt wikibase:rank ?goodRanks.
-  ?twt ps:P2002 ?twtName.
-  FILTER (!isBlank(?twtName)).
-  # don't look at dead accounts
-  FILTER NOT EXISTS { ?twt pq:P582 ?endTime. }
+  
+  # too slow
+  #?twt wikibase:rank ?goodRanks.
+  
+  # too slow
+  #?twt ps:P2002 ?twtName.
+  #FILTER (!isBlank(?twtName)).
+  
+  # don't look at dead accounts (too slow)
+  #FILTER NOT EXISTS { ?twt pq:P582 ?endTime. }
   ## too slow
   ## FILTER NOT EXISTS { ?twt pq:P8554 ?endTime. }
   ## FILTER NOT EXISTS { ?twt pq:P1534 ?endCause. }
   
-  FILTER NOT EXISTS { ?twt pq:P6552 ?twId. }
+  FILTER NOT EXISTS { ?twt pq:P6552 []. }
   ## too slow
   ## FILTER NOT EXISTS { ?twt pq:P585 ?time. }
   ## FILTER NOT EXISTS { ?twt pq:P3744 ?subs. }
-}
+  
+  # only items
+  ?item wikibase:sitelinks [].
+
+} 
