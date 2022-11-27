@@ -15,9 +15,6 @@ WHERE
     ?followers pq:P6552 ?twtSubs.
   }
 
-  ?twt pq:P6552 ?twId.
-  #FILTER (!isBlank(?twId)).
-
-  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
-  FILTER (!(contains(str(?item), "L" ))).
+  ?twt pq:P6552 [].
+  ?item wikibase:sitelinks [].
 }
