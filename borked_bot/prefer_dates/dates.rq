@@ -5,7 +5,7 @@ SELECT DISTINCT ?item WHERE
     ?item wdt:P31 wd:Q5.
     bd:serviceParam bd:slice.offset $offset ;
                     bd:slice.limit $limit .
-    FILTER EXISTS {?item wikibase:sitelinks ?num}.
+    FILTER EXISTS {?item wikibase:sitelinks []}.
   } 
   ?item p:P569 ?statement1, ?statement2 .
   FILTER( ?statement1 != ?statement2 ) .
