@@ -11,7 +11,7 @@ WHERE
   FILTER NOT EXISTS {?f pq:P5436 ?viewers. }
   FILTER NOT EXISTS {?f pq:P2047 ?duration. }
 
-  # don't look at senses
-  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
-
+  # don't look at senses/lexemes
+  MINUS {?item rdf:type ontolex:LexicalSense.}
+  MINUS { ?item wikibase:lemma [] }
 }
