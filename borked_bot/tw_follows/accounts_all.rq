@@ -7,8 +7,7 @@ WHERE
   # don't look at dead accounts
   FILTER NOT EXISTS { ?twt pq:P582 ?endTime. }
 
-  ?twt pq:P6552 ?twId.
+  ?twt pq:P6552 [].
 
-  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
-  FILTER (!(contains(str(?item), "L" ))).
+  ?item wikibase:sitelinks [].
 }
