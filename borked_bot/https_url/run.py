@@ -56,7 +56,10 @@ while offset <  MAX_OFFSET:
                 new_url = check_upgrade_to_ssl(s, url_target)
                 if new_url:
                     url_claim.setTarget(new_url)
-                    item.editEntity(summary="Update URL to HTTPS")    
+                    try:
+                        item.editEntity(summary="Update URL to HTTPS")
+                    except:
+                        continue
     offset += LIMIT
     
 
