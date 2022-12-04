@@ -1,0 +1,23 @@
+SELECT distinct ?item 
+WHERE
+{
+
+  hint:Query hint:optimizer "None".
+  service bd:slice { 
+    ?item p:P856 ?url.
+    bd:serviceParam bd:slice.offset $offset ;
+                    bd:slice.limit $limit .
+
+  } 
+  # find HTTP urls
+  ?url ps:P856 ?urlString.
+  FILTER (STRSTARTS(STR(?urlString), "http://"))
+
+  # don't look at dead urls
+  FILTER NOT EXISTS { ?url pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?url pq:P8554 ?endTime. }
+  FILTER NOT EXISTS { ?url pq:P1534 ?endCause. }
+
+  # only look at items
+  ?item wikibase:sitelinks [].
+}

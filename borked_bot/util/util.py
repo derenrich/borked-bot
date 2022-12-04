@@ -4,12 +4,13 @@ import datetime
 import logging
 import time
 import sys
+import typing
 from datetime import timezone
 from collections import defaultdict
 
 MAX_LAG_BACKOFF_SECS = 10 * 60
 
-def get_item(item):
+def get_item(item: pywikibot.ItemPage):
     try:
         return item.get()
     except pywikibot.exceptions.NoPage:
@@ -37,9 +38,9 @@ def retry(count=3, wait=1, exceptions=[pywikibot.exceptions.APIError]):
         return wrapped_f
     return retrier
 
-def get_valid_claims(item, prop_id):
+def get_valid_claims(item, prop_id) -> typing.List[pywikibot.Claim]:
     claims = item['claims'].get(prop_id, [])
-    return [c for c in claims if c.getRank() != "deprecated"]
+    return [c for c in claims if c.getRank() != "deprecated" and not claim_is_ended(c)]
 
 def get_matching_claim(item, prop_id, prop_value, qualifiers):
     claims = get_valid_claims(item, prop_id)
@@ -77,7 +78,7 @@ def get_all_qualifier_values(claim, qual_id):
 def get_valid_qualifier_times(claim, qual_id):
     return [q.getTarget().toTimestamp() for q in get_valid_qualifier(claim, qual_id) if q.getTarget()]
 
-def get_best_claim(item, prop_id, consider=lambda c: True):
+def get_best_claim(item, prop_id, consider=lambda c: True) -> typing.Optional[pywikibot.Claim]:
     """
     returns a singular best claim if it exists
     """
@@ -103,7 +104,7 @@ def get_best_claim(item, prop_id, consider=lambda c: True):
     return None
 
 END_QUALS = ['P582', 'P8554', 'P1534']
-def claim_is_ended(claim) -> bool:
+def claim_is_ended(claim: pywikibot.Claim) -> bool:
     for end_qual in END_QUALS:
         if get_valid_qualifier(claim, end_qual):
             return True
