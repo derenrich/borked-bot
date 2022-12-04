@@ -21,7 +21,7 @@ def check_upgrade_to_ssl(session: requests.Session, url: str) -> typing.Optional
             return new_url
         else:
             return None
-    except (urllib3.exceptions.MaxRetryError, ReadTimeout, ConnectionError) as e:
+    except (urllib3.exceptions.MaxRetryError, ReadTimeout, ConnectionError, UnicodeError) as e:
         return None
 
 MAX_OFFSET = 1_700_000 # ~ number of valid url items
