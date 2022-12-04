@@ -65,7 +65,7 @@ def main():
     For a random selection of humans find DOB/DOD and update them to the most precise value.
     Only update the most precise value if it has a good reference.
     """
-    MAX_OFFSET = 10_000_000 # there are roughly 10MM humans in wikidata
+    MAX_OFFSET = 10_100_000 # there are roughly 10MM humans in wikidata
     start_idx = random.randint(0, MAX_OFFSET)
     logger = get_logger(__name__)
 
