@@ -1,7 +1,7 @@
 import pywikibot
 from pywikibot import pagegenerators as pg
 import pathlib
-from requests.exceptions import ReadTimeout, ConnectionError, TooManyRedirects, ContentDecodingError
+from requests.exceptions import ReadTimeout, ConnectionError, TooManyRedirects, ContentDecodingError, InvalidURL
 from ..util.util import *
 from tqdm import tqdm
 import urllib3
@@ -21,7 +21,7 @@ def check_upgrade_to_ssl(session: requests.Session, url: str) -> typing.Optional
             return new_url
         else:
             return None
-    except (urllib3.exceptions.MaxRetryError, ReadTimeout, ConnectionError, UnicodeError, TooManyRedirects, ContentDecodingError) as e:
+    except (urllib3.exceptions.MaxRetryError, ReadTimeout, ConnectionError, UnicodeError, TooManyRedirects, ContentDecodingError, InvalidURL) as e:
         return None
 
 MAX_OFFSET = 1_700_000 # ~ number of valid url items
