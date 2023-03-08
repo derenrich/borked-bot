@@ -24,7 +24,7 @@ s = get_session()
 
 TWITTER_USERNAME = 'P2002'
 TWITTER_ID = 'P6552'
-MIN_DATA_AGE_DAYS = 180
+MIN_DATA_AGE_DAYS = 260
 FOLLOWERS = 'P8687'
 
 def make_quals(repo, twt_id):
@@ -60,7 +60,7 @@ def fetch_batch(items):
         item_tw_ids = map(str, sum([get_present_qualifier_values(t, TWITTER_ID) for t in tw_handles], []))
         for tw_id in item_tw_ids:
             age = claim_age(d, FOLLOWERS, TWITTER_ID, tw_id)
-            if age.days >= MIN_DATA_AGE_DAYS:
+            if age is not None and age.days >= MIN_DATA_AGE_DAYS:
                 tw_ids.append(tw_id)
     def get_batch_handles(handles):
         with twt_limiter:
@@ -90,7 +90,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
             if twt_id in fetch:
                 data = fetch[twt_id]
                 followers = data.get('public_metrics', {}).get('followers_count')
-                if followers and followers >= 10000:
+                if followers and followers >= 9000:
                     follower_quant = make_quantity(followers, repo)
                     quals = make_quals(repo, twt_id)
                     add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add follower count", rank='preferred')

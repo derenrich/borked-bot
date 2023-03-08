@@ -5,8 +5,7 @@ WHERE
   ?item p:P2397 ?yt.
   ?yt wikibase:rank ?goodRanks.
 
-  FILTER NOT EXISTS {?itemO ontolex:sense ?item}.
-  FILTER (!(contains(str(?item), "L" ))).
+  ?item wikibase:sitelinks [].
 
   ?article schema:about ?item .
   ?article schema:isPartOf <https://en.wikipedia.org/>.

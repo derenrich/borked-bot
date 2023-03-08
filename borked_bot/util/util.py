@@ -275,29 +275,35 @@ def claim_age(item, prop_id, qual_id, qual_value):
     claims = get_valid_claims(item, prop_id)
     valid_claims = [c for c in claims if qual_value in get_valid_qualifier_values(c, qual_id)]
     if valid_claims:
-        max_date = max(map(get_point_in_time, valid_claims))
-        return today - max_date
-    else:        
+        points_in_time = list(map(get_point_in_time, valid_claims))
+        if points_in_time:
+            max_date = max(points_in_time)
+            return today - max_date
+        else:
+            # failed to parse the date
+            return datetime.timedelta(days=3652058)
+    else:
         return datetime.timedelta(days=3652058)
 
 def latest_claim(item, prop_id, qual_id, qual_value):
     """
     what is the most recent value for this property/qualifier/value triple
     """
-
     claims = get_valid_claims(item, prop_id)
     valid_claims = [c for c in claims if qual_value in get_valid_qualifier_values(c, qual_id)]
     latest_claim = None
     latest_claim_time = datetime.date.min
     for claim in valid_claims:
         claim_date = get_point_in_time(claim)
-        if claim_date > latest_claim_time:
+        if claim_date is not None and claim_date > latest_claim_time:
             latest_claim = claim
             latest_claim_time = claim_date
     return latest_claim
 
 def wb_time_to_date(wb_time):
     day = wb_time.day
+    if wb_time.year > 10000:
+        return None
     if day == 0:
         day = 1
     month = wb_time.month
@@ -309,8 +315,12 @@ def get_point_in_time(claim):
     times = get_valid_qualifier_values(claim, POINT_IN_TIME)
     if len(times) >= 2 or not times:
         return datetime.date.min
-    return wb_time_to_date(times[0])
-    
+    time = wb_time_to_date(times[0])
+    if time:
+        return time
+    else:
+        return datetime.date.min
+
 def update_most_recent_rank(item, prop_id, qual_id):
     """
     For a property find all statements with a given qualifier value.
