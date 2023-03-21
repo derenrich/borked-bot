@@ -132,7 +132,7 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 last_update_date = get_point_in_time(newest_claim)
                 today = date.today()
                 # is the last update too new?
-                if today - last_update_date > timedelta(days=365):
+                if today - last_update_date < timedelta(days=365):
                     continue
 
             uncertainty = get_uncertainty(sub_count)
