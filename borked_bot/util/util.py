@@ -348,3 +348,11 @@ def update_most_recent_rank(item, prop_id, qual_id):
                 c.changeRank('normal')
         if most_recent.getRank() != 'preferred':
             most_recent.changeRank('preferred')
+
+
+def ask_sparql(session, prop, value):
+    # WARNING: WIP (Not tested)
+    headers = dict(Accept="application/sparql-results+json")
+    URL = "https://query.wikidata.org/sparql?query=ASK { ?channel wdt:{prop} \"{value}\". }"
+    res = session.get(URL, headers=headers).json()
+    return res['boolean']

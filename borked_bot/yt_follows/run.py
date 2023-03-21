@@ -10,7 +10,7 @@ from ..util.youtube import *
 from ..util.batcher import *
 from tqdm import tqdm
 from dateutil.parser import isoparse
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 # we can do 10k queries per day or one every 0.11 seconds
 yt_limiter = RateLimiter(max_calls=11, period=100)
@@ -26,7 +26,15 @@ MIN_FOLLOWS = 5000
 MIN_DATA_AGE_DAYS = 365
 MAX_YT_PER_REQ = 50
 YT_CHAN_ID = 'P2397'
+YT_API_ID = 'Q8056784'
 FOLLOWERS = 'P8687'
+STATED_IN = 'P248'
+
+def make_reference(repo):
+    retrieved = retrieved_claim(repo)
+    stated_in_claim = pywikibot.Claim(repo, STATED_IN)
+    stated_in_claim.setTarget(pywikibot.ItemPage(repo, YT_API_ID))
+    return [retrieved, stated_in_claim]
 
 def get_uncertainty(sub_count):
     # based on https://support.google.com/youtube/answer/6051134
@@ -117,14 +125,21 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
                 continue
             sub_count = int(sub_count)
 
-            old_sub_count = get_target_float_quantity(latest_claim(d, FOLLOWERS, YT_CHAN_ID, yt_id))
-            if  old_sub_count is not None and not should_update(old_sub_count, sub_count):
-                continue
+            newest_claim = latest_claim(d, FOLLOWERS, YT_CHAN_ID, yt_id)
+            old_sub_count = get_target_float_quantity(newest_claim)
+            # are there not enough new subs?
+            if old_sub_count is not None and not should_update(old_sub_count, sub_count):
+                last_update_date = get_point_in_time(newest_claim)
+                today = date.today()
+                # is the last update too new?
+                if today - last_update_date < timedelta(days=365):
+                    continue
 
             uncertainty = get_uncertainty(sub_count)
             follower_quant = make_quantity(sub_count, repo, error=(uncertainty - 1, 0))
             quals = make_quals(repo, yt_id)
-            add_claim(repo, item, FOLLOWERS, follower_quant, qualifiers=quals, comment="add subscriber count", rank='preferred')
+            ref = make_reference(repo)
+            add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count", rank='preferred')
             count += 1
             update_most_recent_rank(d, FOLLOWERS, YT_CHAN_ID)
     except ValueError:
