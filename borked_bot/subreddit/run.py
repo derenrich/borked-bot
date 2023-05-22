@@ -9,6 +9,7 @@ from tqdm import tqdm
 from datetime import datetime, timedelta
 from dateutil.parser import isoparse
 import prawcore
+import sys
 
 SUBREDDIT_ID = 'P3984'
 END_TIME = 'P582'
@@ -18,6 +19,8 @@ NAMED_AS = 'P1810'
 START_TIME = 'P580'
 LANGUAGE = 'P407'
 FOLLOWERS = 'P8687'
+OVER_18 = 'Q83807365'
+
 MIN_SUB_COUNT = 10000
 MIN_AGE_DAYS = timedelta(days=365)
 
@@ -63,34 +66,42 @@ def add_subreddit_subcount(item, d, subreddit_name, sub_count):
     
     
 def add_subreddit_qualifiers(claim, s):
-    qualifiers = []
     point_in_time = point_in_time_claim(repo)
-    qualifiers.append(point_in_time)
 
     name = s.title
     name_claim = pywikibot.Claim(repo, NAMED_AS, is_qualifier=True)
     name_claim.setTarget(name.strip())
-    qualifiers.append(name_claim)
 
     subreddit_type = s.subreddit_type
 
     lang = s.lang
     lang_qid = parse_iso_lang(lang)
+    lang_claim = None
     if lang_qid:
         lang_claim = pywikibot.Claim(repo, LANGUAGE, is_qualifier=True)
         lang_target = pywikibot.ItemPage(repo, lang_qid)
         lang_claim.setTarget(lang_target)
-        qualifiers.append(lang_claim)
 
     over18 = s.over18
-    
+    over18_claim = None
+    if over18:
+        over18_claim = pywikibot.Claim(repo, HAS_QUALITY, is_qualifier=True)
+        over18_qid = pywikibot.ItemPage(repo, OVER_18)
+        over18_claim.setTarget(over18_qid)
     created_at = s.created_utc
     created_at_date = datetime.utcfromtimestamp(created_at)
     created_at_wb = make_date(created_at_date.year, created_at_date.month, created_at_date.day)
     created_at_claim = pywikibot.Claim(repo, START_TIME, is_qualifier=True)
     created_at_claim.setTarget(created_at_wb)
-    qualifiers.append(created_at_claim)
 
+
+    qualifiers = [name_claim, created_at_claim]
+    if lang_claim:
+        qualifiers.append(lang_claim)
+    qualifiers += [point_in_time]
+    if over18_claim:
+        qualifiers.append(over18_claim)
+    
     update_qualifiers(repo, claim, qualifiers, "update subreddit data")
     
 for item in tqdm(generator):
