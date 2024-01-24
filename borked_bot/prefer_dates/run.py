@@ -15,7 +15,7 @@ DATE_PROP = ['P569', 'P570']
 REASON_FOR_UPRANK = 'P7452'
 MOST_PRECISE_VALUE = 'Q71536040'
 
-LIMIT = 200
+LIMIT = 1000
 WD = str(pathlib.Path(__file__).parent.absolute())
 
 with open(WD + '/dates.rq', 'r') as query_file:
@@ -65,7 +65,7 @@ def main():
     For a random selection of humans find DOB/DOD and update them to the most precise value.
     Only update the most precise value if it has a good reference.
     """
-    MAX_OFFSET = 10_100_000 # there are roughly 10MM humans in wikidata
+    MAX_OFFSET = 11_000_000 # there are roughly 11MM humans in wikidata
     start_idx = random.randint(0, MAX_OFFSET)
     logger = get_logger(__name__)
 
