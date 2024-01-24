@@ -3,7 +3,7 @@ from .util import *
 from googleapiclient.discovery import build
 import socket
 from requests.exceptions import ReadTimeout, ConnectionError
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 
 YT_MAX_RESULTS = 50
 
