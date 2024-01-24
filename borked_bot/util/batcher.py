@@ -1,8 +1,13 @@
 import logging
+import random
 
-
-def batcher(generator, batch_func, batch_size):
+def batcher(generator, batch_func, batch_size, shuffle=False):
     buf = []
+
+    if shuffle:
+        generator = list(generator)
+        random.shuffle(generator)
+    
     for item in generator:
         buf.append(item)
         if len(buf) >= batch_size:

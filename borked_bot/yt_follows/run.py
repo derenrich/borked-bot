@@ -53,6 +53,7 @@ def make_quals(repo, yt_id):
     quals.append(point_in_time_claim(repo))
     return quals
 
+# whether we should override the updating logic and just update
 def should_update(old_sub_count, new_sub_count):
     if 'ENWIKI' in os.environ:
         if old_sub_count is None:
@@ -106,7 +107,7 @@ def fetch_batch(items):
     return res
 
 count = 0
-for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
+for item, fetch in tqdm(batcher(generator, fetch_batch, USERS_PER_REQ, shuffle=True)):
     d = get_item(item)
     if not d:
         continue
@@ -127,8 +128,11 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
 
             newest_claim = latest_claim(d, FOLLOWERS, YT_CHAN_ID, yt_id)
             old_sub_count = get_target_float_quantity(newest_claim)
+
+
             # are there not enough new subs?
-            if old_sub_count is not None and not should_update(old_sub_count, sub_count):
+            should_we_update = should_update(old_sub_count, sub_count)
+            if old_sub_count is not None and not should_we_update:
                 last_update_date = get_point_in_time(newest_claim)
                 today = date.today()
                 # is the last update too new?
@@ -139,7 +143,10 @@ for item, fetch in batcher(tqdm(generator), fetch_batch, USERS_PER_REQ):
             follower_quant = make_quantity(sub_count, repo, error=(uncertainty - 1, 0))
             quals = make_quals(repo, yt_id)
             ref = make_reference(repo)
-            add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count", rank='preferred')
+            ADDENDUM = ""
+            if 'ENWIKI' in os.environ:
+                ADDENDUM = " (enwiki)"
+            add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count" + ADDENDUM, rank='preferred')
             count += 1
             update_most_recent_rank(d, FOLLOWERS, YT_CHAN_ID)
     except ValueError:
