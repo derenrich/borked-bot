@@ -30,6 +30,8 @@ YT_API_ID = 'Q8056784'
 FOLLOWERS = 'P8687'
 STATED_IN = 'P248'
 
+ENWIKI_MODE = 'ENWIKI' in os.environ
+
 def make_reference(repo):
     retrieved = retrieved_claim(repo)
     stated_in_claim = pywikibot.Claim(repo, STATED_IN)
@@ -55,7 +57,7 @@ def make_quals(repo, yt_id):
 
 # whether we should override the updating logic and just update
 def should_update(old_sub_count, new_sub_count):
-    if 'ENWIKI' in os.environ:
+    if ENWIKI_MODE:
         if old_sub_count is None:
             return True
         if old_sub_count * 1.1 < new_sub_count :
@@ -71,7 +73,7 @@ def should_update(old_sub_count, new_sub_count):
 SPARQL_FILE = 'accounts.rq'
 if 'ALL_ITEMS' in os.environ:
     SPARQL_FILE = 'accounts_all.rq'
-if 'ENWIKI' in os.environ:
+if ENWIKI_MODE:
     SPARQL_FILE = 'accounts_all_enwiki.rq'
     MIN_DATA_AGE_DAYS = 7
 
@@ -94,7 +96,8 @@ def fetch_batch(items):
         new_yt_ids = [chan.getTarget() for chan in yt_chans if chan.getTarget()]
         for yt_id in new_yt_ids:
             age = claim_age(d, FOLLOWERS, YT_CHAN_ID, yt_id)
-            if age.days >= MIN_DATA_AGE_DAYS:
+            # in ENWIKI_MODE we set MIN_DATA_AGE_DAYS to 7
+            if (age.days >= MIN_DATA_AGE_DAYS):
                 yt_ids.append(yt_id)
     def get_batch_yt(yt_ids):
         with yt_limiter:
@@ -144,7 +147,7 @@ for item, fetch in tqdm(batcher(generator, fetch_batch, USERS_PER_REQ, shuffle=T
             quals = make_quals(repo, yt_id)
             ref = make_reference(repo)
             ADDENDUM = ""
-            if 'ENWIKI' in os.environ:
+            if ENWIKI_MODE:
                 ADDENDUM = " (enwiki)"
             add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count" + ADDENDUM, rank='preferred')
             count += 1
