@@ -18,7 +18,7 @@ spec:
       template:
         metadata:
           labels:
-            name: borkedbot.bot-twitch
+            name: borkedbot.bot-twit
             toolforge: tool
         spec:
           activeDeadlineSeconds: 604800
