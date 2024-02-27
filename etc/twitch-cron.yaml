@@ -3,13 +3,13 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: borkedbot.bot-twit
+  name: borkedbot.bot-twitch
   namespace: tool-borkedbot
   labels:
-    name: borkedbot.bot-twit
+    name: borkedbot.bot-twitch
     toolforge: tool
 spec:
-  schedule: "0 0 * * 1" # weekly on monday
+  schedule: "@weekly"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 0
   failedJobsHistoryLimit: 1
@@ -26,7 +26,7 @@ spec:
           containers:
             - name: bot
               image: docker-registry.tools.wmflabs.org/toolforge-python37-sssd-base:latest
-              command: [ "/data/project/borkedbot/borked-bot/bin/borkedbot.sh", "run-twt" ]
+              command: [ "/data/project/borkedbot/borked-bot/bin/borkedbot.sh", "run-twitch" ]
               workingDir: /data/project/borkedbot
               env:
                 - name: HOME
