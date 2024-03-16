@@ -95,7 +95,18 @@ case "$1" in
         cd ${TOOL_DIR}
         exec python -m borked_bot.ballotpedia_page
         ;;
-
+    run-twitch)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot twitch filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.twitch_chan_fill
+        ;;
+    run-twitch-fol)
+        date +%Y-%m-%dT%H:%M:%S
+        echo "Running borkedbot twitch follows filler..."
+        cd ${TOOL_DIR}
+        exec python -m borked_bot.twitch_follows
+        ;;
     stop)
         echo "Stopping borkedbot k8s job..."
         $KUBECTL delete job ${DEPLOYMENT}
