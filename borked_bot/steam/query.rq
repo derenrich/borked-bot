@@ -1,0 +1,12 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P1733 ?steam.
+  ?steam wikibase:rank ?goodRanks.
+  FILTER (!isBlank(?steam)).
+  # don't look at dead steam accounts
+  FILTER NOT EXISTS { ?steam pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?steam pq:1534 ?endCause. }
+    
+} 

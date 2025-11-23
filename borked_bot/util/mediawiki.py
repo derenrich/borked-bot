@@ -17,6 +17,7 @@ def get_wikipage_quals(session, repo, API_ENDPOINT, title):
     try:
       response = session.get(API_ENDPOINT, params=payload)
     except (urllib3.exceptions.MaxRetryError, ConnectionError) as e:
+      print(f"Request failed: {e}", API_ENDPOINT, title)
       response = None
     if not response:
         return

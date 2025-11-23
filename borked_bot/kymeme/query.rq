@@ -1,0 +1,8 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P6760 ?f.
+  ?f wikibase:rank ?goodRanks.
+  FILTER NOT EXISTS { ?item p:P13484 ?kymSlug. }
+}

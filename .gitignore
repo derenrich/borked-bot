@@ -1,3 +1,7 @@
+# borkedbot
+.env
+apicache
+
 # pywikibot
 pywikibot.lwp
 throttle.ctrl
@@ -140,3 +144,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.DS_Store

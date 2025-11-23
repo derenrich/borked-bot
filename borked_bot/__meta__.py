@@ -1,6 +1,6 @@
 name = 'borked-bot'
 path = name.lower().replace("-", "_").replace(" ", "_")
-version = '0.1.dev0'  # https://python.org/dev/peps/pep-0440 https://semver.org
+version = '0.2.dev0'
 author = 'Author Name'
 author_email = ''
 description = ''  # One-liner

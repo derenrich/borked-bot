@@ -1,0 +1,19 @@
+[project]
+name = "borked-bot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.14.2",
+    "fire>=0.7.1",
+    "google-api-python-client>=2.185.0",
+    "lxml>=6.0.2",
+    "mwparserfromhell>=0.7.2",
+    "python-dateutil>=2.9.0.post0",
+    "python-dotenv>=1.1.1",
+    "pywikibot>=10.5.0",
+    "ratelimiter>=1.2.0.post0",
+    "requests-oauthlib>=2.0.0",
+    "tqdm>=4.67.1",
+]

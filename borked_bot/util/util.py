@@ -4,20 +4,25 @@ import datetime
 import logging
 import time
 import sys
+import random
 import typing
 from datetime import timezone
 from collections import defaultdict
 
 MAX_LAG_BACKOFF_SECS = 10 * 60
 
+def editgroup_string() -> str:
+    group_id = "{:x}".format(random.randrange(0, 2**48))
+    return f"([[:toolforge:editgroups/b/CB/{group_id}|details]])"
+
 def get_item(item: pywikibot.ItemPage):
     try:
         return item.get()
-    except pywikibot.exceptions.NoPage:
+    except pywikibot.exceptions.NoPageError:
         return None
     except pywikibot.exceptions.IsRedirectPageError:
         return None
-    except pywikibot.exceptions.UnknownSite:
+    except pywikibot.exceptions.UnknownSiteError:
         return None
 
 def retry(count=3, wait=1, exceptions=[pywikibot.exceptions.APIError]):
@@ -38,11 +43,11 @@ def retry(count=3, wait=1, exceptions=[pywikibot.exceptions.APIError]):
         return wrapped_f
     return retrier
 
-def get_valid_claims(item, prop_id) -> typing.List[pywikibot.Claim]:
-    claims = item['claims'].get(prop_id, [])
+def get_valid_claims(item: pywikibot.ItemPage | dict, prop_id) -> typing.List[pywikibot.Claim]:
+    claims = item['claims'].get(prop_id, []) # type: ignore
     return [c for c in claims if c.getRank() != "deprecated" and not claim_is_ended(c)]
 
-def get_matching_claim(item, prop_id, prop_value, qualifiers):
+def get_matching_claim(item: pywikibot.ItemPage, prop_id: str, prop_value: typing.Optional[pywikibot.Claim], qualifiers: typing.Dict[str, typing.Any]) -> typing.Optional[pywikibot.Claim]:
     claims = get_valid_claims(item, prop_id)
 
     for c in claims:
@@ -123,7 +128,7 @@ def get_logger(name) -> logging.Logger:
     logger.setLevel("INFO")
     return logger
 
-def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="", rank='normal'):
+def add_claim(repo, item: pywikibot.ItemPage, prop, target, sources = [], qualifiers = [], comment="", rank='normal'):
     try:
         c = pywikibot.Claim(repo, prop, rank=rank)
         c.setTarget(target)
@@ -132,7 +137,7 @@ def add_claim(repo, item, prop, target, sources = [], qualifiers = [], comment="
                 c.addQualifier(qual)
         item.addClaim(c, summary=comment, bot=True)
         if sources:
-            c.addSources(sources, summary="adding sources", bot=True)
+            c.addSources(sources, summary=comment + " (adding sources)", bot=True)
         return c
     except (pywikibot.exceptions.OtherPageSaveError, pywikibot.exceptions.APIError) as ex:
         logging.error("failed to add claim for prop %s", prop, exc_info=ex)
@@ -161,7 +166,7 @@ def update_sources(claim, new_sources, comment=""):
 
 
 @retry()
-def update_qualifiers(repo, claim, qualifiers, comment=""):
+def update_qualifiers(repo, claim: pywikibot.Claim, qualifiers, comment=""):
     for q in qualifiers:
         if not q.isQualifier:
             raise Exception("only qualifiers can be passed here")

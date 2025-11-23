@@ -1,0 +1,15 @@
+SELECT distinct ?item
+WHERE
+{
+  VALUES ?goodRanks { wikibase:NormalRank wikibase:PreferredRank }
+  ?item p:P12361 ?bsky.
+  ?bsky wikibase:rank ?goodRanks.
+  FILTER (!isBlank(?bsky)).
+  # don't look at dead yt accounts
+  FILTER NOT EXISTS { ?bsky pq:P582 ?endTime. }
+  FILTER NOT EXISTS { ?bsky pq:1534 ?endCause. }
+  
+  # does not have a DID
+  FILTER NOT EXISTS { ?bsky pq:P12409 ?bskyDid. } 
+  
+} 

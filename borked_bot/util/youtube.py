@@ -1,16 +1,15 @@
-from ..credentials import CREDENTIALS
 from .util import *
 from googleapiclient.discovery import build
 import socket
 from requests.exceptions import ReadTimeout, ConnectionError
-#from bs4 import BeautifulSoup
+import os
 
 YT_MAX_RESULTS = 50
 
 def make_yt_client():
     api_service_name = "youtube"
     api_version = "v3"
-    api_key = CREDENTIALS['youtube']
+    api_key = os.environ['YOUTUBE_API_KEY']
     
     youtube = build(api_service_name, api_version, developerKey=api_key)
     return youtube
@@ -26,7 +25,6 @@ def batch_list_chan(yt, ids):
 
     if 'items' not in res:
         return out
-
     for c in res['items']:
         out[c['id']] = c
     return out
