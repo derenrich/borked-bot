@@ -2,6 +2,7 @@ from typing import Literal, Union
 import pywikibot
 from .yt_follows.update_yt_follows import fixed_gen, template_gen, update_yt_subs, should_update_enwiki, enwiki_gen, all_gen
 from .yt_chan_fill.update_yt_chan import update_yt_chan, all_gen as yt_chan_all_gen
+from .yt_vid_fill.run import update_yt_vid
 import time
 import fire
 import dotenv
@@ -41,6 +42,13 @@ class BorkedBot:
         t = time.time()
         update_yt_chan(repo, yt_chan_all_gen(wikidata_site), dry_run=dry_run)
         print(f"Finished updating YouTube channel data in {time.time() - t} seconds.")
+
+    def yt_vid(self, dry_run: bool=False):
+        print("Updating YouTube video data...")
+        t = time.time()
+        
+        update_yt_vid(repo, wikidata_site, dry_run=dry_run)
+        print(f"Finished updating YouTube video data in {time.time() - t} seconds.")
 
     def migrate_kymeme(self, dry_run: bool=False):
         print("Migrating Know Your Meme IDs...")

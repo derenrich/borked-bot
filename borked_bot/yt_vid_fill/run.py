@@ -1,16 +1,12 @@
 import pywikibot
 from pywikibot import pagegenerators as pg
 import pathlib
-from ratelimiter import RateLimiter
 from ..util.youtube import *
-from ..credentials import CREDENTIALS
 from ..util.util import *
 from ..util.batcher import *
 from tqdm import tqdm
-import isbnlib
-from lxml import etree
-from io import StringIO, BytesIO
 from datetime import datetime
+from borked_bot.util.ratelimit import RateLimiter
 from dateutil.parser import isoparse
 from isodate import parse_duration
 import random
@@ -72,15 +68,14 @@ def make_quals(repo, view_count, title, start_time, lang_qid, iso_duration, chan
     return quals
 
 
-WD = str(pathlib.Path(__file__).parent.absolute())
 
-with open(WD + '/vids.rq', 'r') as query_file:
-    QUERY = query_file.read()
+def all_gen(wikidata_site):
+    WD = str(pathlib.Path(__file__).parent.absolute())
+    with open(WD + '/vids.rq', 'r') as query_file:
+        QUERY = query_file.read()
+    generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
+    return generator
 
-wikidata_site = pywikibot.Site("wikidata", "wikidata")
-repo = wikidata_site.data_repository()
-
-generator = pg.WikidataSPARQLPageGenerator(QUERY, site=wikidata_site)
 
 def fetch_batch(items):
     vids = []
@@ -98,43 +93,49 @@ def fetch_batch(items):
         res = batch_list_vids(yt, vids)
     return res
 
+def update_yt_vid(repo, wikidata_site, dry_run=False):
+    generator = all_gen(wikidata_site)
+    eg_string = editgroup_string()
+    count = 0
+    for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
+        d = get_item(item)
+        if not d:
+            continue
+        yt_chans = get_valid_claims(d, YT_VID_ID)
+        
+        for yt_vid_claim in yt_chans:
+            try:
+                yt_vid_id = yt_vid_claim.getTarget()
+                points_in_time = get_present_qualifier_values(yt_vid_claim, POINT_IN_TIME)
+                if points_in_time:
+                    max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
+                    if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
+                        # don't update new data
+                        continue
+                if yt_vid_id in fetch:
+                    data = fetch[yt_vid_id]
+                    iso_duration = data.get('contentDetails', {}).get('duration')
+                    view_count = data.get('statistics',{}).get('viewCount')
+                    title = data.get('snippet',{}).get('title')
+                    channel = data.get('snippet',{}).get('channelId')
+                    if get_present_qualifier_values(yt_vid_claim, TITLE):
+                        # don't update if there's a title already
+                        title = None
+                    start_time =  data.get('snippet', {}).get('publishedAt')
+                    lang = parse_iso_lang(data.get('snippet', {}).get('defaultLanguage')) or parse_iso_lang(data.get('snippet', {}).get('defaultAudioLanguage'))
+                    if get_present_qualifier_values(yt_vid_claim, LANG):
+                        # don't update if there's a lang already
+                        lang = None
+                    quals = make_quals(repo, view_count, title, start_time, lang, iso_duration, channel)
 
-count = 0
-for item, fetch in batcher(tqdm(generator), fetch_batch, 40):
-    d = get_item(item)
-    if not d:
-        continue
-    yt_chans = get_valid_claims(d, YT_VID_ID)
-    
-    for yt_vid_claim in yt_chans:
-        try:
-            yt_vid_id = yt_vid_claim.getTarget()
-            points_in_time = get_present_qualifier_values(yt_vid_claim, POINT_IN_TIME)
-            if points_in_time:
-                max_time = max(map(lambda t: t.toTimestamp(), points_in_time))
-                if (datetime.now() - max_time).total_seconds() < 24 * 60 * 60 * MIN_DATA_AGE_DAYS:
-                    # don't update new data
-                    continue
-            if yt_vid_id in fetch:
-                data = fetch[yt_vid_id]
-                iso_duration = data.get('contentDetails', {}).get('duration')
-                view_count = data.get('statistics',{}).get('viewCount')
-                title = data.get('snippet',{}).get('title')
-                channel = data.get('snippet',{}).get('channelId')
-                if get_present_qualifier_values(yt_vid_claim, TITLE):
-                    # don't update if there's a title already
-                    title = None
-                start_time =  data.get('snippet', {}).get('publishedAt')
-                lang = parse_iso_lang(data.get('snippet', {}).get('defaultLanguage')) or parse_iso_lang(data.get('snippet', {}).get('defaultAudioLanguage'))
-                if get_present_qualifier_values(yt_vid_claim, LANG):
-                    # don't update if there's a lang already
-                    lang = None
-                quals = make_quals(repo, view_count, title, start_time, lang, iso_duration, channel)
-
-                update_qualifiers(repo, yt_vid_claim, quals, "update youtube video data from api")
-                count += 1
-            else:
-                pass
-        except ValueError:
-            traceback.print_exception(*sys.exc_info())
-print(f"updated {count} entries")
+                    if dry_run:
+                        print(f"dry run: would update youtube video {yt_vid_id} on item {item.title()} with quals {quals}")
+                    else:
+                        update_qualifiers(repo, yt_vid_claim, quals, "update youtube video data from api " + eg_string)
+                    count += 1
+                else:
+                    pass
+            except ValueError:
+                print(f"failed to process youtube video {yt_vid_id} on item {item.title()}")
+                traceback.print_exception(*sys.exc_info())
+    print(f"updated {count} entries")

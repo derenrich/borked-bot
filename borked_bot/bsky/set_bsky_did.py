@@ -2,12 +2,10 @@ import pywikibot
 from pywikibot import pagegenerators as pg
 import pathlib
 
-from borked_bot.util.ratelimit import RateLimiter
 from ..util.youtube import *
 from ..util.util import *
 from ..util.batcher import *
 from tqdm import tqdm
-from lxml import etree
 from io import StringIO, BytesIO
 from datetime import datetime
 from dateutil.parser import isoparse
