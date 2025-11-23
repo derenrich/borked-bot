@@ -9,6 +9,8 @@ source ~/venv/bin/activate
 pip install -U pip wheel
 pip install uv
 
+cd ~/borked-bot
+
 uv run "$@"
 
 
