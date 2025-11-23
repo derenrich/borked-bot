@@ -15,7 +15,7 @@ repo = wikidata_site.data_repository()
 
 
 class BorkedBot:
-    def yt_follows(self, dry_run: bool=False, mode: Union[Literal['enwiki'], Literal['all'], Literal['fixed'], Literal['template']] ='enwiki', qid: str =None, only_best: bool=True):
+    def yt_follows(self, dry_run: bool=False, mode: Union[Literal['enwiki'], Literal['all'], Literal['fixed'], Literal['template']] ='enwiki', qid: str | None =None, only_best: bool=True):
 
         if not isinstance(only_best, bool):
             raise ValueError("only_best must be a boolean value (True or False)")

@@ -175,6 +175,7 @@ def try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=Fals
 
 
 def update_yt_subs(repo, item_generator, should_update_func, COMMENT_ADDENDUM="", min_age_days=365, dry_run=False, only_best: bool=True):
+    eg_string = editgroup_string()
     for item, fetch in tqdm(batcher(item_generator, fetcher(min_age_days), USERS_PER_REQ, shuffle=False)):
         d = get_item(item)
         if not d:
@@ -235,7 +236,7 @@ def update_yt_subs(repo, item_generator, should_update_func, COMMENT_ADDENDUM=""
                         follower_quant = make_quantity(sub_count, repo, error=(uncertainty - 1, 0))
                         quals = make_quals(repo, yt_id, handle)
                         ref = make_reference(repo)
-                        add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count" + COMMENT_ADDENDUM, rank='preferred')
+                        add_claim(repo, item, FOLLOWERS, follower_quant, sources=ref, qualifiers=quals, comment="add subscriber count "+ COMMENT_ADDENDUM + " " + eg_string, rank='preferred')
                         update_most_recent_rank(d, FOLLOWERS, YT_CHAN_ID)
             except ValueError:
                 traceback.print_exception(*sys.exc_info())

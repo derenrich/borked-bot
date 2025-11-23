@@ -135,6 +135,8 @@ def add_claim(repo, item: pywikibot.ItemPage, prop, target, sources = [], qualif
         if qualifiers:
             for qual in qualifiers:
                 c.addQualifier(qual)
+        if comment:
+            comment = comment.strip()
         item.addClaim(c, summary=comment, bot=True)
         if sources:
             c.addSources(sources, summary=comment + " (adding sources)", bot=True)
