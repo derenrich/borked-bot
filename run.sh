@@ -5,6 +5,6 @@
 
 python3 -m pip install --user uv
 
-uv run borked_bot.run "$@"
+uv run "$@"
 
 
