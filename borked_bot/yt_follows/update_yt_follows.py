@@ -131,7 +131,7 @@ def fetch_batch(items, min_data_age_days=365):
         res.update(dict(fetch))
     return res
 
-def try_set_handle(repo, item, d, handle, yt_id, dry_run=False):
+def try_set_handle(repo, item, d, handle, yt_id, dry_run=False, eg_string=""):
     # check if we already have a handle claim for this handle
     existing_handles = get_valid_claims(d, YT_HANDLE_ID)
     if existing_handles:
@@ -144,10 +144,10 @@ def try_set_handle(repo, item, d, handle, yt_id, dry_run=False):
         print(f"would add handle {handle} to {item.title()}")
     else:
         ref = make_reference(repo)
-        add_claim(repo, item, YT_HANDLE_ID, handle, sources=ref, qualifiers=make_quals(repo, yt_id), comment="add missing YouTube handle", rank='normal')
+        add_claim(repo, item, YT_HANDLE_ID, handle, sources=ref, qualifiers=make_quals(repo, yt_id), comment="add missing YouTube handle " + eg_string, rank='normal')
 
 
-def try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=False):
+def try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=False, eg_string=""):
     # check if we already have a view count claim for this yt id
     newest_claim = latest_claim(d, VIEWS, YT_CHAN_ID, yt_id)   
     if newest_claim is not None:
@@ -168,7 +168,7 @@ def try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=Fals
         if dry_run:
             print(f"would add view count {view_count} to {item.title()} for yt id {yt_id}")
         else:
-            add_claim(repo, item, VIEWS, view_quant, sources=ref, qualifiers=quals, comment="add YouTube view count", rank='normal')
+            add_claim(repo, item, VIEWS, view_quant, sources=ref, qualifiers=quals, comment="add YouTube view count " + eg_string, rank='normal')
             update_most_recent_rank(d, VIEWS, YT_CHAN_ID)
     elif dry_run:
         print(f"would skip adding view count {view_count} to {item.title()} for yt id {yt_id} because old was {old_view_count} and age was {view_count_age.days} days")
@@ -201,12 +201,12 @@ def update_yt_subs(repo, item_generator, should_update_func, COMMENT_ADDENDUM=""
                     handle = data.get('snippet', {}).get('customUrl')
                     if handle:
                         handle = handle.lstrip('@')
-                        try_set_handle(repo, item, d, handle, yt_id, dry_run=dry_run)
+                        try_set_handle(repo, item, d, handle, yt_id, dry_run=dry_run, eg_string=eg_string)
 
                     view_count = data.get('statistics', {}).get('viewCount')
                     if view_count is not None and int(view_count) >= MIN_VIEWS:
                         view_count = int(view_count)
-                        try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=dry_run)
+                        try_update_view_count(repo, item, d, view_count, yt_id, handle, dry_run=dry_run, eg_string=eg_string)
 
                     sub_count = data.get('statistics', {}).get('subscriberCount')
                     if sub_count is None or int(sub_count) < MIN_FOLLOWS:
