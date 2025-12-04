@@ -220,6 +220,7 @@ def update_yt_subs(repo, item_generator, should_update_func, COMMENT_ADDENDUM=""
                     # are there not enough new subs?
                     should_we_update_subs = should_update_func(old_sub_count, sub_count)
                     if newest_claim:
+                        # we automatically update if the data is older than a year
                         should_we_update_date =  date.today() - get_point_in_time(newest_claim) >= timedelta(days=365)
                     else:
                         should_we_update_date = True

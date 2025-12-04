@@ -26,6 +26,8 @@ class BorkedBot:
         t = time.time()
         if mode == 'all':
             update_yt_subs(repo, all_gen(wikidata_site), lambda old, new: True, dry_run=dry_run, only_best=only_best)
+        elif mode == 'all-should-update':
+            update_yt_subs(repo, all_gen(wikidata_site), should_update_enwiki, dry_run=dry_run, only_best=only_best)
         elif mode == 'enwiki':
             update_yt_subs(repo, enwiki_gen(wikidata_site), should_update_enwiki, " (enwiki)", dry_run=dry_run, min_age_days=365, only_best=only_best)
         elif mode == 'fixed' and qid is not None:
