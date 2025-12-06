@@ -1,3 +1,4 @@
+from weakref import ref
 import pywikibot
 import traceback
 import sys, os, math
@@ -27,6 +28,7 @@ YT_API_ID = 'Q8056784'
 FOLLOWERS = 'P8687'
 VIEWS = 'P5436'
 STATED_IN = 'P248'
+MATCHED_BY_IDENT = 'P11797'
 DETERMINATION_METHOD = 'P459'
 YT_VIEW_COUNT_METHOD = 'Q63185508'
 
@@ -143,7 +145,13 @@ def try_set_handle(repo, item, d, handle, yt_id, dry_run=False, eg_string=""):
     if dry_run:
         print(f"would add handle {handle} to {item.title()}")
     else:
-        ref = make_reference(repo)
+        matched_by_claim = pywikibot.Claim(repo, MATCHED_BY_IDENT)
+        matched_by_claim.setTarget(pywikibot.ItemPage(repo, YT_API_ID))
+        retrieved = retrieved_claim(repo)
+        yt_id_claim = pywikibot.Claim(repo, YT_CHAN_ID)
+        yt_id_claim.setTarget(yt_id)
+
+        ref = [retrieved, matched_by_claim, yt_id_claim]
         add_claim(repo, item, YT_HANDLE_ID, handle, sources=ref, qualifiers=make_quals(repo, yt_id), comment="add missing YouTube handle " + eg_string, rank='normal')
 
 
