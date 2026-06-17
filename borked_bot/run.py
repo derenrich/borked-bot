@@ -11,6 +11,7 @@ dotenv.load_dotenv()
 
 wikidata_site = pywikibot.Site("wikidata", "wikidata")
 enwiki_site = pywikibot.Site("en", "wikipedia")
+commons_site = pywikibot.Site("commons", "commons")
 repo = wikidata_site.data_repository()
 
 
@@ -86,6 +87,20 @@ class BorkedBot:
         from .fandom_page.run import update_fandom_data
         update_fandom_data(repo, wikidata_site, dry_run=dry_run)
         print(f"Finished updating Fandom page data in {time.time() - t} seconds.")
+
+    def nsfw_commons(self, dry_run: bool=False, threshold: float=0.9, batch_size: int=16, batches: int=50, thumb_width: int=400, category: str | None=None, limit: int=200):
+        if not isinstance(dry_run, bool):
+            raise ValueError("dry_run must be a boolean value (True or False)")
+        if category:
+            print(f"Classifying Commons images from category '{category}' for NSFW content...")
+        else:
+            print("Classifying random Commons images for NSFW content...")
+        t = time.time()
+        from .nsfw_commons.run import update_nsfw_commons
+        update_nsfw_commons(commons_site, repo, dry_run=dry_run, threshold=threshold,
+                            batch_size=batch_size, batches=batches, thumb_width=thumb_width,
+                            category=category, limit=limit)
+        print(f"Finished classifying Commons images in {time.time() - t} seconds.")
 
 if __name__ == '__main__':
     fire.Fire(BorkedBot, name='borked-bot')

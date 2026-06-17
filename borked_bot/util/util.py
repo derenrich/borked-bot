@@ -115,9 +115,19 @@ def claim_is_ended(claim: pywikibot.Claim) -> bool:
             return True
     return False
 
+# Wikimedia User-Agent policy compliant UA for requests-based API access.
+# Format: <client>/<version> (<contact>) <library>/<version>
+# https://meta.wikimedia.org/wiki/User-Agent_policy
+from ..__meta__ import version as _BOT_VERSION
+USER_AGENT = (
+    f"BorkedBot/{_BOT_VERSION} "
+    "(https://www.wikidata.org/wiki/User:BorkedBot; User:BrokenSegue) "
+    f"python-requests/{requests.__version__}"
+)
+
 def get_session() -> requests.Session:
     s = requests.Session()
-    s.headers.update({'User-Agent': 'BorkedBot[Wikidata]'})
+    s.headers.update({'User-Agent': USER_AGENT})
     return s
 
 
