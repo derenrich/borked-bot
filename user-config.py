@@ -13,7 +13,7 @@ usernames['commons']['commons'] = 'BorkedBot'
 
 
 console_encoding = 'utf-8'
-maxlag = 5
+write_maxlag = 5
 max_retries = 1000
 maxthrottle = 120
 put_throttle = 3
