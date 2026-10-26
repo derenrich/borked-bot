@@ -88,10 +88,12 @@ class BorkedBot:
         update_fandom_data(repo, wikidata_site, dry_run=dry_run)
         print(f"Finished updating Fandom page data in {time.time() - t} seconds.")
 
-    def nsfw_commons(self, dry_run: bool=False, threshold: float=0.9, batch_size: int=16, batches: int=50, thumb_width: int=400, category: str | None=None, limit: int=200):
+    def nsfw_commons(self, dry_run: bool=False, threshold: float=0.9, batch_size: int=16, batches: int=50, thumb_width: int=400, category: str | None=None, enwiki_category: str | None=None, limit: int=200, table: str | None=None):
         if not isinstance(dry_run, bool):
             raise ValueError("dry_run must be a boolean value (True or False)")
-        if category:
+        if enwiki_category:
+            print(f"Classifying Commons images used in enwiki category '{enwiki_category}' for NSFW content...")
+        elif category:
             print(f"Classifying Commons images from category '{category}' for NSFW content...")
         else:
             print("Classifying random Commons images for NSFW content...")
@@ -99,7 +101,8 @@ class BorkedBot:
         from .nsfw_commons.run import update_nsfw_commons
         update_nsfw_commons(commons_site, repo, dry_run=dry_run, threshold=threshold,
                             batch_size=batch_size, batches=batches, thumb_width=thumb_width,
-                            category=category, limit=limit)
+                            category=category, enwiki_category=enwiki_category, limit=limit,
+                            table=table, sleep=10)
         print(f"Finished classifying Commons images in {time.time() - t} seconds.")
 
 if __name__ == '__main__':
